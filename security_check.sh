@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Check the program's code with Bandit and write the report into the output folder:
 #
-#     ./security_check.sh            # output folder from ~/.pyraceresults/properties.xml
+#     ./security_check.sh            # output folder from ~/.lakemark/properties.xml
 #     ./security_check.sh some/dir   # or here
 #
 # Needs Bandit (pipx install bandit). Writes, in <output folder>/security/:

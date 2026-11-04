@@ -19,7 +19,7 @@ class VersionTests(unittest.TestCase):
             with contextlib.redirect_stdout(out), self.assertRaises(SystemExit) as ctx:
                 main.main([option])
             self.assertEqual(ctx.exception.code, 0)
-            self.assertTrue(re.fullmatch(r"pyraceresults \S+ \(\d{1,2} \w+ \d{4}\)\n", out.getvalue()),
+            self.assertTrue(re.fullmatch(r"Lakemark \S+ \(\d{1,2} \w+ \d{4}\)\n", out.getvalue()),
                             out.getvalue())
 
 

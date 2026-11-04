@@ -1,6 +1,6 @@
 """front_window.py - the first window: every competition in the data folder.
 
-Competition files (*.cxml) in the data folder (~/.pyraceresults, or a portable copy's system
+Competition files (*.cxml) in the data folder (~/.lakemark, or a portable copy's system
 folder) are listed here. Double-click one (or select it
 and click Open) to open it in its own window. Edit changes a competition's name, classes, clubs
 and so on (and its file name to match the name); New creates a file in the folder. Delete takes it off the list by renaming the file to .cxml.deleted, so it can be brought

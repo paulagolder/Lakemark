@@ -1,5 +1,5 @@
 @echo off
-rem Build a single Windows program file: dist\pyraceresults.exe
+rem Build a single Windows program file: dist\lakemark.exe
 rem
 rem     build_windows.bat
 rem
@@ -9,7 +9,7 @@ rem
 rem     py -m pip install pyinstaller
 rem
 rem Data is not part of the program: each user's competitions stay in
-rem C:\Users\<name>\.pyraceresults.
+rem C:\Users\<name>\.lakemark.
 
 setlocal
 cd /d "%~dp0"
@@ -25,12 +25,12 @@ if errorlevel 1 (
 
 echo Building...
 %PYTHON% -m PyInstaller --noconfirm --clean --onefile --windowed ^
-    --name pyraceresults ^
+    --name lakemark ^
     --add-data "%CD%\app\resources;app\resources" ^
     --distpath dist --workpath build --specpath build ^
     main.py
 if errorlevel 1 exit /b 1
 
 echo.
-echo Done: %CD%\dist\pyraceresults.exe
+echo Done: %CD%\dist\lakemark.exe
 echo Copy it anywhere and double-click it to run.

@@ -1,22 +1,22 @@
 """settings_store.py - the settings: the data folder and its properties.xml.
 
-Competition files live in ~/.pyraceresults by default. That folder also holds properties.xml:
+Competition files live in ~/.lakemark by default. That folder also holds properties.xml:
 
     <properties>
-      <title>RC Yacht Race Tables</title>
+      <title>Lakemark</title>
       <default_rows>5</default_rows>
       <default_columns>4</default_columns>
-      <output_folder>~/Documents/raceresult_output</output_folder>
+      <output_folder>~/Documents/lakemark_output</output_folder>
     </properties>
 
 output_folder is where Export HTML writes, in a sub folder named after the competition file
-(for example ~/Documents/raceresult_output/DF95_2026/). ~ and $VARIABLES are expanded. A
+(for example ~/Documents/lakemark_output/DF95_2026/). ~ and $VARIABLES are expanded. A
 relative folder ("output") is in the folder that holds the data folder.
 
 A portable copy (on a USB stick, say) keeps everything together:
 
-    RC-Yacht-Racing/
-        pyraceresults        the program
+    Lakemark/
+        lakemark             the program
         output/              the exported web pages: the only folder a user needs
         system/              the data folder: properties.xml, the sailors, the competitions
 
@@ -39,10 +39,11 @@ from pathlib import Path
 from ..model.limits import DEFAULT_RACES, DEFAULT_ROWS, MAX_PLACES, MAX_RACES
 from .xml_file import parse_xml
 
-DATA_DIR = Path.home() / ".pyraceresults"
+DATA_DIR = Path.home() / ".lakemark"
+OLD_DATA_DIR = Path.home() / ".pyraceresults"   # the data folder before version 1.04
 PROPERTIES_FILE = "properties.xml"
-DEFAULT_TITLE = "RC Yacht Race Tables"
-DEFAULT_OUTPUT_FOLDER = "~/Documents/raceresult_output"
+DEFAULT_TITLE = "Lakemark"
+DEFAULT_OUTPUT_FOLDER = "~/Documents/lakemark_output"
 SYSTEM_FOLDER = "system"                 # beside the program: a portable copy's data folder
 PORTABLE_OUTPUT_FOLDER = "output"        # beside the program, in a portable copy
 LOGO_FILE = Path(__file__).parent.parent / "resources" / "club_logo.png"   # made from club_logo.svg
@@ -64,9 +65,21 @@ class Settings:
 
 def find_data_dir(program_dir) -> Path:
     """The system folder beside the program if there is one (a portable copy), otherwise
-    ~/.pyraceresults."""
+    ~/.lakemark."""
     system = Path(program_dir) / SYSTEM_FOLDER
     return system if system.is_dir() else DATA_DIR
+
+
+def move_old_data_dir(new: Path = DATA_DIR, old: Path = OLD_DATA_DIR) -> Path:
+    """Before version 1.04 (when the program was called pyraceresults) the data folder was
+    ~/.pyraceresults. Move it to ~/.lakemark the first time, so a user keeps their competitions
+    and sailors. Returns the folder to use: the old one if it cannot be moved."""
+    if not new.exists() and old.is_dir():
+        try:
+            old.rename(new)
+        except OSError:
+            return old
+    return new
 
 
 def _default_output(data_dir: Path) -> str:

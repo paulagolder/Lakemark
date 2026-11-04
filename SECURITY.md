@@ -11,8 +11,8 @@ checker for Python code (from the Python Code Quality Authority). Run it again a
 - It uses only Python's standard library: no third-party packages are installed or bundled.
 - It does not use the network: there is no `socket`, `urllib`, `requests` or `http` in the code.
   It does not run code it reads (`eval`, `exec`, `pickle`).
-- It reads and writes its XML files in `~/.pyraceresults`, and writes exported pages and reports
-  in the output folder (`properties.xml`, default `~/Documents/raceresult_output`).
+- It reads and writes its XML files in `~/.lakemark`, and writes exported pages and reports
+  in the output folder (`properties.xml`, default `~/Documents/lakemark_output`).
 - It makes a `.bak` copy of a file before replacing it (`app/storage/xml_file.py`).
 - After **Export HTML** it opens the page in the web browser (`app/ui/browser.py`).
 

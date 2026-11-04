@@ -1,6 +1,6 @@
 """member_store.py - read and write the club's sailors, RMBCSail.xml.
 
-The file lives in the data folder (~/.pyraceresults), one <sail> per boat:
+The file lives in the data folder (~/.lakemark), one <sail> per boat:
 
     <sails>
       <sail sailnumber="   01" boatclass="VICTORIA" forename="Polly" surname="Breeze" club="RMBC"

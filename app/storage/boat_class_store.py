@@ -1,6 +1,6 @@
 """boat_class_store.py - read and write the club's boat classes, yachtclasses.xml.
 
-The file lives in the data folder (~/.pyraceresults), one <boatclass> per class:
+The file lives in the data folder (~/.lakemark), one <boatclass> per class:
 
     <classes>
       <boatclass key="df65" fullname="DF65" cypher="65" symbol="#" />

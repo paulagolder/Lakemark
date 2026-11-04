@@ -10,6 +10,7 @@ from app.storage.settings_store import (
     SYSTEM_FOLDER,
     find_data_dir,
     load_settings,
+    move_old_data_dir,
 )
 
 
@@ -17,7 +18,7 @@ class SettingsTests(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self._tmp.cleanup)
-        self.dir = Path(self._tmp.name) / ".pyraceresults"
+        self.dir = Path(self._tmp.name) / ".lakemark"
 
     def write(self, text: str) -> None:
         self.dir.mkdir(parents=True, exist_ok=True)
@@ -46,7 +47,7 @@ class SettingsTests(unittest.TestCase):
 
     def test_output_folder(self):
         self.assertEqual(load_settings(self.dir).output_dir,
-                         Path.home() / "Documents" / "raceresult_output")
+                         Path.home() / "Documents" / "lakemark_output")
         absolute = Path(self._tmp.name) / "results"      # with its drive letter on Windows
         self.write(f"<properties><output_folder>{absolute}</output_folder></properties>")
         self.assertEqual(load_settings(self.dir).output_dir, absolute)
@@ -55,8 +56,28 @@ class SettingsTests(unittest.TestCase):
         self.write("<properties><output_folder>results</output_folder></properties>")
         self.assertEqual(load_settings(self.dir).output_dir, self.dir.parent / "results")
 
+    def test_moves_the_old_data_folder(self):
+        old, new = Path(self._tmp.name) / ".pyraceresults", Path(self._tmp.name) / ".lakemark"
+        old.mkdir()
+        (old / "DF95_2026.cxml").write_text("<competition/>", encoding="utf-8")
+        self.assertEqual(move_old_data_dir(new, old), new)
+        self.assertFalse(old.exists())
+        self.assertTrue((new / "DF95_2026.cxml").exists())
+
+    def test_keeps_the_new_data_folder_if_both_exist(self):
+        old, new = Path(self._tmp.name) / ".pyraceresults", Path(self._tmp.name) / ".lakemark"
+        old.mkdir()
+        new.mkdir()
+        self.assertEqual(move_old_data_dir(new, old), new)
+        self.assertTrue(old.exists())                                 # left for the user to sort out
+
+    def test_no_old_data_folder(self):
+        new = Path(self._tmp.name) / ".lakemark"
+        self.assertEqual(move_old_data_dir(new, Path(self._tmp.name) / ".pyraceresults"), new)
+        self.assertFalse(new.exists())                                # load_settings makes it
+
     def test_portable_copy_uses_its_system_folder(self):
-        program = Path(self._tmp.name) / "RC-Yacht-Racing"
+        program = Path(self._tmp.name) / "Lakemark"
         self.assertEqual(find_data_dir(program), DATA_DIR)            # no system folder
         (program / SYSTEM_FOLDER).mkdir(parents=True)
         data_dir = find_data_dir(program)

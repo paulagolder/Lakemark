@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Put the portable copy on a USB stick, with the club's data:
 #
-#     ./make_stick.sh /media/$USER/STICK                    data from ~/.pyraceresults
+#     ./make_stick.sh /media/$USER/STICK                    data from ~/.lakemark
 #     ./make_stick.sh /media/$USER/STICK ~/other-data       data from another folder
 #
-# Makes STICK/RC-Yacht-Racing/ (see portable/README.txt):
+# Makes STICK/Lakemark/ (see portable/README.txt):
 #
-#     pyraceresults        the program
+#     lakemark             the program
 #     output/              exported web pages
 #     system/              settings, club sailors, boat classes, competitions
 #
@@ -25,23 +25,23 @@ if [ $# -lt 1 ] || [ $# -gt 2 ]; then
     exit 2
 fi
 stick="${1%/}"
-data="${2:-$HOME/.pyraceresults}"
-portable=dist/RC-Yacht-Racing
-target="$stick/RC-Yacht-Racing"
+data="${2:-$HOME/.lakemark}"
+portable=dist/Lakemark
+target="$stick/Lakemark"
 
 [ -d "$stick" ] && [ -w "$stick" ] || { echo "Cannot write to $stick: is the stick plugged in?" >&2; exit 1; }
 [ -d "$data" ] || { echo "No data folder $data" >&2; exit 1; }
 
 # Build if there is no program yet, or the code has changed since it was built.
-if [ ! -f "$portable/pyraceresults" ] ||
-   [ -n "$(find main.py app portable -newer "$portable/pyraceresults" -type f -print -quit)" ]; then
+if [ ! -f "$portable/lakemark" ] ||
+   [ -n "$(find main.py app portable -newer "$portable/lakemark" -type f -print -quit)" ]; then
     echo "Building the program first..."
     ./build_linux.sh >/dev/null
 fi
 
 echo "Putting the program on $target ..."
 mkdir -p "$target/output" "$target/system"
-cp "$portable/pyraceresults" "$target/"
+cp "$portable/lakemark" "$target/"
 cp "$portable/system/README.txt" "$portable/system/start-linux.sh" "$target/system/"
 
 if [ -n "$(find "$target/system" -maxdepth 1 \( -name '*.cxml' -o -name 'RMBCSail.xml' \) -print -quit)" ]; then
@@ -69,8 +69,8 @@ sync
 
 echo
 echo "Done: $target"
-if "$target/pyraceresults" --version >/dev/null 2>&1; then
-    echo "The program runs straight from the stick: double-click pyraceresults (in the Files app,"
+if "$target/lakemark" --version >/dev/null 2>&1; then
+    echo "The program runs straight from the stick: double-click lakemark (in the Files app,"
     echo "right-click > Run as a Program if double-clicking does not start it)."
 else
     fstype="$(findmnt -n -o FSTYPE --target "$target" 2>/dev/null || true)"

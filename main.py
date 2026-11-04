@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Start the program:
 
-    python main.py                   (lists the competitions in ~/.pyraceresults)
+    python main.py                   (lists the competitions in ~/.lakemark)
     python main.py --version         (prints the version and its date)
     python main.py --data FOLDER     (uses FOLDER as the data folder instead)
 
@@ -21,13 +21,14 @@ from pathlib import Path
 
 from app import __version__, __version_date__
 
-PROGRAM = "pyraceresults"
+PROGRAM = "lakemark"                     # the program file's name
+NAME = "Lakemark"
 
 
 def version_text() -> str:
-    """'pyraceresults 1.01 (17 October 2026)'."""
+    """'Lakemark 1.04 (4 November 2026)'."""
     date = datetime.date.fromisoformat(__version_date__)
-    return f"{PROGRAM} {__version__} ({date.day} {date:%B %Y})"
+    return f"{NAME} {__version__} ({date.day} {date:%B %Y})"
 
 
 def _show(text: str) -> None:
@@ -39,7 +40,7 @@ def _show(text: str) -> None:
     from tkinter import messagebox
     root = tk.Tk()
     root.withdraw()
-    messagebox.showinfo(PROGRAM, text, parent=root)
+    messagebox.showinfo(NAME, text, parent=root)
     root.destroy()
 
 
@@ -59,16 +60,19 @@ class _VersionAction(argparse.Action):
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = _Parser(prog=PROGRAM, description="Enter and edit RC yacht race results.")
+    parser = _Parser(prog=PROGRAM, description="Lakemark: race results for RC yachts.")
     parser.add_argument("-V", "--version", action=_VersionAction)
     parser.add_argument("--data", metavar="FOLDER", type=Path,
                         help="the data folder (default: a system folder beside the program, "
-                             "otherwise ~/.pyraceresults)")
+                             "otherwise ~/.lakemark)")
     args = parser.parse_args(argv)
 
-    from app.storage.settings_store import find_data_dir
+    from app.storage.settings_store import DATA_DIR, find_data_dir, move_old_data_dir
     from app.ui.front_window import FrontWindow     # only once a window is wanted
-    FrontWindow(args.data or find_data_dir(program_dir())).mainloop()
+    data_dir = args.data or find_data_dir(program_dir())
+    if data_dir == DATA_DIR:
+        data_dir = move_old_data_dir()
+    FrontWindow(data_dir).mainloop()
 
 
 def program_dir() -> Path:

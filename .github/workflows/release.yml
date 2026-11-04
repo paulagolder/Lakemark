@@ -2,11 +2,11 @@
 #
 # Runs when a version tag is pushed:
 #
-#     git tag -a v1.02 -m "pyraceresults 1.02"
+#     git tag -a v1.04 -m "Lakemark 1.04"
 #     git push origin v1.02
 #
 # The tests run on both systems first; if they fail, nothing is published. The release (named
-# after the tag) gets two files: pyraceresults-<version>-linux and pyraceresults-<version>-windows.exe.
+# after the tag) gets two files: lakemark-<version>-linux and lakemark-<version>-windows.exe.
 #
 # It can also be started by hand (Actions > Build and release > Run workflow) to check that the
 # builds work: then the files are kept with the run (under Artifacts) and nothing is published.
@@ -46,8 +46,8 @@ jobs:
         if: matrix.name == 'linux'
         run: |
           ./build_linux.sh
-          dist/pyraceresults --version
-          mv dist/pyraceresults "dist/pyraceresults-${GITHUB_REF_NAME#v}-linux"
+          dist/lakemark --version
+          mv dist/lakemark "dist/lakemark-${GITHUB_REF_NAME#v}-linux"
 
       - name: Build (Windows)
         if: matrix.name == 'windows'
@@ -57,12 +57,12 @@ jobs:
         run: |
           call build_windows.bat || exit /b 1
           set VERSION=%GITHUB_REF_NAME:v=%
-          move dist\pyraceresults.exe "dist\pyraceresults-%VERSION%-windows.exe"
+          move dist\lakemark.exe "dist\lakemark-%VERSION%-windows.exe"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: pyraceresults-${{ matrix.name }}
-          path: dist/pyraceresults-*
+          name: lakemark-${{ matrix.name }}
+          path: dist/lakemark-*
           if-no-files-found: error
 
   release:
@@ -84,5 +84,5 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" files/* \
             --repo "$GITHUB_REPOSITORY" \
-            --title "pyraceresults ${GITHUB_REF_NAME#v}" \
-            --notes "Download the file for your computer: **-linux** for Linux, **-windows.exe** for Windows. Your competitions and club sailors stay in the .pyraceresults folder in your home folder and are not touched by a new version."
+            --title "Lakemark ${GITHUB_REF_NAME#v}" \
+            --notes "Download the file for your computer: **-linux** for Linux, **-windows.exe** for Windows. Your competitions and club sailors stay in the .lakemark folder in your home folder and are not touched by a new version."

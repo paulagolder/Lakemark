@@ -1,6 +1,6 @@
 """limits.py - how big things may be, and the defaults for new race days.
 
-DEFAULT_RACES and DEFAULT_ROWS can be changed in ~/.pyraceresults/properties.xml (see
+DEFAULT_RACES and DEFAULT_ROWS can be changed in ~/.lakemark/properties.xml (see
 storage/settings_store.py), within these limits.
 """
 

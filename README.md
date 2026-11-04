@@ -1,6 +1,6 @@
-# RC Yacht Racing
+# Lakemark
 
-Enter and edit race results for radio-controlled model sailing yachts.
+Race results for RC yachts: enter and edit race results for radio-controlled model sailing yachts.
 
 - A **competition** has a name, a year, one or more boat classes and the clubs whose sailors may race,
   and lives in one XML file. It holds up to **15 race days**.
@@ -16,10 +16,11 @@ Enter and edit race results for radio-controlled model sailing yachts.
 
 ## The data folder
 
-Everything lives in `~/.pyraceresults` (created on first run):
+Everything lives in `~/.lakemark` (created on first run). Before version 1.04 the program was called
+pyraceresults and used `~/.pyraceresults`; the first run of 1.04 moves that folder to `~/.lakemark`.
 
 - `properties.xml`: the window title, the default number of rows and columns for a new race day, and
-  `output_folder`, where **Export HTML** writes (default `~/Documents/raceresult_output`).
+  `output_folder`, where **Export HTML** writes (default `~/Documents/lakemark_output`).
 - `RMBCSail.xml`: the club sailors, one `<sail sailnumber="   01" boatclass="DF95" forename=".." surname=".." club="RMBC" tag="PG" />` per boat (tag: see below). Edit it with the
   **File > Club sailors...** menu in the competitions window, then click Save. "Show class" limits the list to one class.
 - Competition files, named after the competition, like `Victoria_df65_competition_2026.cxml`.
@@ -40,8 +41,8 @@ straight away.
 Needs Python 3.9 or newer with tkinter (included with the Windows and macOS installers from python.org;
 on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
-    python main.py                   # lists the competitions in ~/.pyraceresults
-    python main.py --version         # pyraceresults 1.03 (17 October 2026)
+    python main.py                   # lists the competitions in ~/.lakemark
+    python main.py --version         # Lakemark 1.04 (4 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -87,7 +88,7 @@ each race day's figures and the leading boats in the current results.
 
 In the race day window, **Export HTML** writes the table as a web page, with each sailor's name under
 their sail number. It goes in `output_folder` (see properties.xml), in the competition's HTML folder
-(`directory`), for example `~/Documents/raceresult_output/Victoria2026/Race_day_1.html`. Exporting
+(`directory`), for example `~/Documents/lakemark_output/Victoria2026/Race_day_1.html`. Exporting
 the same race day again replaces its page.
 
 In a results window, **Export HTML** writes that table as `results_current.html` or
@@ -105,26 +106,26 @@ outside its own files and what the findings mean.
 
 Each is a single file with Python included, so it runs on computers without Python installed.
 Data is not part of the program: replacing it with a new build never touches anyone's
-`.pyraceresults` folder.
+`.lakemark` folder.
 
 **Linux** (on Linux):
 
     pipx install pyinstaller         # once
-    ./build_linux.sh                 # runs the tests, then builds dist/pyraceresults
+    ./build_linux.sh                 # runs the tests, then builds dist/lakemark
 
 It runs on the Linux version it was built on and newer ones, so build on the oldest one you need.
 
-The build also makes a **portable copy** for a USB stick, `dist/RC-Yacht-Racing/`:
+The build also makes a **portable copy** for a USB stick, `dist/Lakemark/`:
 
-    RC-Yacht-Racing/
-        pyraceresults        the program
+    Lakemark/
+        lakemark             the program
         output/              exported web pages: the only folder users need to open
-        system/              the data folder (instead of ~/.pyraceresults), README.txt and
+        system/              the data folder (instead of ~/.lakemark), README.txt and
                              start-linux.sh
 
 To make a stick, plug it in and run
 
-    ./make_stick.sh /media/$USER/STICK         # data from ~/.pyraceresults (or name another)
+    ./make_stick.sh /media/$USER/STICK         # data from ~/.lakemark (or name another)
 
 It builds the program if needed and copies the club's files into `system/` (with
 `output_folder` set to `output`). On a stick that already has data it only updates the
@@ -142,7 +143,7 @@ picks any data folder by hand.
 **Windows** (on Windows, with Python from python.org):
 
     py -m pip install pyinstaller    # once
-    build_windows.bat                # runs the tests, then builds dist\pyraceresults.exe
+    build_windows.bat                # runs the tests, then builds dist\lakemark.exe
 
 The .exe is not code-signed, so Windows may warn "Windows protected your PC": click
 **More info**, then **Run anyway**.
@@ -150,8 +151,8 @@ The .exe is not code-signed, so Windows may warn "Windows protected your PC": cl
 **Both at once, on GitHub**: push a version tag and GitHub builds both (on Ubuntu 22.04 and
 Windows), runs the tests on each, and publishes them as a release to download:
 
-    git tag -a v1.03 -m "pyraceresults 1.03"
-    git push origin v1.03
+    git tag -a v1.04 -m "Lakemark 1.04"
+    git push origin v1.04
 
 See `.github/workflows/release.yml`. It can also be run by hand from the Actions tab to check
 the builds without publishing anything.
