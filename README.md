@@ -218,6 +218,26 @@ Windows), runs the tests on each, and publishes them as a release to download:
 See `.github/workflows/release.yml`. It can also be run by hand from the Actions tab to check
 the builds without publishing anything.
 
+### Making a release from IntelliJ IDEA
+
+First commit and push the changes, and run the program once from the Run button to check it.
+Then:
+
+1. **Make the tag.** Choose **Git > New Tag...**. Type the tag name, such as `v1.05` (`v` and
+   the version in `app/__init__.py`), and the message `Lakemark 1.05`. Leave Commit blank, so
+   the tag goes on the latest commit. Click **Create Tag**.
+   (No New Tag in the Git menu? Open the Git tool window, bottom left, go to its **Log** tab,
+   right-click the top commit and choose **New Tag...**.)
+2. **Push the tag.** Choose **Git > Push...** (Ctrl+Shift+K), tick **Push tags** at the bottom
+   (choose **All** if it offers a choice), and click **Push**.
+3. **Wait for the build.** On GitHub, the repository's **Actions** tab shows it running. A few
+   minutes later the **Releases** page has the Linux and Windows files to download.
+
+Or paste the two lines above into IntelliJ's **Terminal** tab (bottom of the window).
+
+For the next version, change `__version__` and `__version_date__` in `app/__init__.py` first,
+and commit that.
+
 In the race day window, **Enter**, **Tab** or **Down** moves down the column (adding a row at the bottom until
 there are 15, then moving to the top of the next column); **Shift+Tab** or **Up** goes back.
 **Add row / Add column** grow the table, up to the limits.

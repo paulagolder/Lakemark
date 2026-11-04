@@ -46,8 +46,8 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(load_settings(self.dir).default_club, "RMBC")
 
     def test_old_title(self):
-        self.write("<properties><title> RMBC Radio Sailing </title></properties>")
-        self.assertEqual(old_title(self.dir), "RMBC Radio Sailing")
+        self.write("<properties><title> Rugeley Model Boat Club </title></properties>")
+        self.assertEqual(old_title(self.dir), "Rugeley Model Boat Club")
         for default in ("Lakemark", "RC Yacht Race Tables", ""):     # never set: no title
             self.write(f"<properties><title>{default}</title></properties>")
             self.assertEqual(old_title(self.dir), "")

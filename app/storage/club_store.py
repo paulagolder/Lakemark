@@ -3,7 +3,7 @@
 Each club is a folder in the data folder, holding <abbreviation>Club.xml (see model/club.py):
 
     <club>
-      <title>RMBC Radio Sailing</title>
+      <title>Rugeley Model Boat Club</title>
     </club>
 
 A sub folder without its Club.xml is not a club, and is left alone.

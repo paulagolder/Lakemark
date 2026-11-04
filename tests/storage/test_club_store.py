@@ -77,9 +77,9 @@ class ClubStoreTests(unittest.TestCase):
 
     def test_title_is_saved(self):
         club = create_club(self.dir, "RMBC")
-        club.title = "RMBC Radio Sailing"
+        club.title = "Rugeley Model Boat Club"
         save_club(club)
-        self.assertEqual(find_club(self.dir, "RMBC").title, "RMBC Radio Sailing")
+        self.assertEqual(find_club(self.dir, "RMBC").title, "Rugeley Model Boat Club")
         club.details_file.write_text("<club><title>", encoding="utf-8")   # broken: abbreviation
         self.assertEqual(find_club(self.dir, "RMBC").title, "RMBC")
 
@@ -127,8 +127,8 @@ class ConvertOldFolderTests(unittest.TestCase):
         logo.write_bytes(b"png")
         self.assertTrue(has_old_files(self.dir))
 
-        club = convert_old_folder(self.dir, "RMBC Radio Sailing", logo)
-        self.assertEqual((club.abbreviation, club.title), ("RMBC", "RMBC Radio Sailing"))
+        club = convert_old_folder(self.dir, "Rugeley Model Boat Club", logo)
+        self.assertEqual((club.abbreviation, club.title), ("RMBC", "Rugeley Model Boat Club"))
         self.assertFalse(has_old_files(self.dir))
         self.assertEqual(sorted(p.name for p in club.folder.iterdir()),
                          ["DF95_2026.cxml", "DF95_2026.cxml.bak", "Old.cxml.deleted", "RMBCClasses.xml",
