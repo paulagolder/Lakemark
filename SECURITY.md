@@ -14,6 +14,12 @@ checker for Python code (from the Python Code Quality Authority). Run it again a
 - It reads and writes its XML files in `~/.lakemark`, and writes exported pages and reports
   in the output folder (`properties.xml`, default `~/Documents/lakemark_output`).
 - It makes a `.bak` copy of a file before replacing it (`app/storage/xml_file.py`).
+- **Club > club details > Choose picture...** copies the picture the user picks into the
+  club's folder as its logo; only PNG and GIF files are accepted (`app/storage/club_store.py`).
+- **Club > Export club...** writes a zip file where the user chooses. **Club > Import club...**
+  unpacks a zip file the user picks into the data folder, only if it is one club's folder: no
+  names leading outside it, no sub folders, at most 2,000 files and 200 MB, and never over a
+  club that is already there (`app/storage/club_transfer.py`).
 - After **Export HTML** it opens the page in the web browser (`app/ui/browser.py`).
 
 ## Bandit's findings, and what they mean

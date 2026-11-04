@@ -4,12 +4,12 @@ A race day is open to all its competition's classes, so a sail number on its own
 than one eligible sailor's. An entry can carry tags that say which:
 
     12          the sail number; enough if only one eligible sailor has it
-    12@         a class tag: the class's symbol (yachtclasses.xml). Used when the choices are
+    12@         a class tag: the class's symbol (in the classes file). Used when the choices are
                 the same sailor in different classes.
     12/PAG      a sailor tag (Sailor.tag). Used when the choices are different sailors.
     12@/PAG     both, if neither alone tells the choices apart.
 
-SailResolver knows the eligible classes, the clubs and the club sailors. It finds the sailor an
+SailResolver knows the eligible classes and the club sailors. It finds the sailor an
 entry means, gives the tagged entries to choose from when a plain number is ambiguous, and
 checks a race day's results.
 """
@@ -46,11 +46,9 @@ class SailEntry:
 
 
 class SailResolver:
-    def __init__(self, members: MemberList | None, classes: list[BoatClass],
-                 clubs: list[str] | None = None):
+    def __init__(self, members: MemberList | None, classes: list[BoatClass]):
         self.members = members
         self.classes = list(classes)            # the eligible classes
-        self.clubs = list(clubs or [])          # none: any club
         self._symbols = {c.symbol.strip(): c for c in self.classes if c.symbol.strip()}
 
     @property
@@ -83,7 +81,7 @@ class SailResolver:
 
     def candidates(self, text: str) -> list[Sailor]:
         """Every eligible sailor the entry could mean: its sail number in an eligible class,
-        from one of the clubs, and matching any tags."""
+        and matching any tags."""
         if self.members is None:
             return []
         entry = self.parse(text)
@@ -93,7 +91,7 @@ class SailResolver:
         found = []
         for boat_class in classes:
             for name in dict.fromkeys((boat_class.fullname, boat_class.key)):
-                sailor = self.members.find(entry.number, name, self.clubs)
+                sailor = self.members.find(entry.number, name)
                 if sailor is not None and sailor not in found:
                     found.append(sailor)
         if entry.sailor_tag:
@@ -127,8 +125,8 @@ class SailResolver:
         return options
 
     def describe(self, sailor: Sailor) -> str:
-        """'12: Ann Smith (DF65, RMBC)'."""
-        return f"{sailor.number}: {sailor.name} ({self.class_name(sailor)}, {sailor.club})"
+        """'12: Ann Smith (DF65)'."""
+        return f"{sailor.number}: {sailor.name} ({self.class_name(sailor)})"
 
     def boat_key(self, text: str) -> tuple[str, str]:
         """The same boat, however it was typed: its class and sail number when it is known."""
@@ -148,7 +146,6 @@ class SailResolver:
         if self.members is None:
             return []
         classes = " or ".join(self.class_names)
-        from_clubs = f" from {', '.join(self.clubs)}" if self.clubs else ""
         problems = []
         for c, race in enumerate(races):
             boats: dict[tuple[str, str], int] = {}               # boat -> row first seen
@@ -158,7 +155,7 @@ class SailResolver:
                 found = self.candidates(value)
                 if not found:
                     problems.append((r, c, f"Unrecognised sail '{value}': no {classes} "
-                                           f"sailor{from_clubs} has it."))
+                                           "sailor has it."))
                     continue
                 if len(found) > 1:
                     names = "; ".join(self.describe(s) for s in found)

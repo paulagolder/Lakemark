@@ -1,6 +1,6 @@
 """competition_window.py - the window for one open competition.
 
-    CompetitionWindow(parent, session, settings, on_close=...)
+    CompetitionWindow(parent, session, settings, club, on_close=...)
 
 Pick a race day from the list, and enter or edit its results. Every change is saved to the
 competition file as soon as the race day window is saved. The Results button offers the
@@ -17,6 +17,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 from typing import Callable
 
+from ..model.club import Club
 from ..model.limits import MAX_RACE_DAYS
 from ..model.member_list import MemberList
 from ..model.race_day import RaceDay, default_races
@@ -34,13 +35,14 @@ from .results_window import ResultsWindow
 
 
 class CompetitionWindow(tk.Toplevel):
-    def __init__(self, parent: tk.Tk, session: CompetitionSession, settings: Settings,
+    def __init__(self, parent: tk.Tk, session: CompetitionSession, settings: Settings, club: Club,
                  on_close: Callable[[], None] | None = None):
         super().__init__(parent)
         self.session = session
         self.settings = settings
+        self.club = club
         self._on_close = on_close
-        self.title(f"{settings.title} - {session.competition.title}")
+        self.title(f"{club.title} - {session.competition.title}")
         self.geometry("900x560")
         self.minsize(720, 440)
 
@@ -127,10 +129,9 @@ class CompetitionWindow(tk.Toplevel):
         days = session.competition.race_days
         competition = session.competition
         self.title_var.set(competition.title)
-        clubs = ", ".join(competition.clubs) or "any club"
         counted = (f"best {competition.race_count} races count" if competition.race_count
                    else "every race counts")
-        self.path_var.set(f"{', '.join(session.class_names)} · {clubs} · {counted}\n{session.path}")
+        self.path_var.set(f"{', '.join(session.class_names)} · {counted}\n{session.path}")
         self.days_frame.configure(text=f"Race days ({len(days)} of {MAX_RACE_DAYS})")
         for day in days:
             self.listbox.insert(tk.END, day.label)
@@ -233,9 +234,8 @@ class CompetitionWindow(tk.Toplevel):
         """Open a window with the current or the final results over all race days so far."""
         competition = self.session.competition
         results = final_results(self._results()) if final else current_results(self._results())
-        ResultsWindow(self, results, competition.title,
-                      html_folder=self.settings.output_dir / competition.directory,
-                      club_title=self.settings.title)
+        ResultsWindow(self, results, competition.title, html_folder=self._html_folder(),
+                      club_title=self.club.title, logo=self.club.logo)
 
     def export_abridged(self, final: bool) -> None:
         """Write the current or final results as a web page with only the totals (no race days),
@@ -243,8 +243,8 @@ class CompetitionWindow(tk.Toplevel):
         competition = self.session.competition
         results = final_results(self._results()) if final else current_results(self._results())
         try:
-            path = export_results_html(self.settings.output_dir / competition.directory, results,
-                                       abridged=True, club_title=self.settings.title,
+            path = export_results_html(self._html_folder(), results, abridged=True,
+                                       club_title=self.club.title, logo=self.club.logo,
                                        competition_title=competition.title)
         except StorageError as exc:
             messagebox.showerror("Export HTML", str(exc), parent=self)
@@ -258,25 +258,28 @@ class CompetitionWindow(tk.Toplevel):
         competition = self.session.competition
         summary = competition_summary(competition, self._results(), self.session.class_names)
         ReportWindow(self, summary_text(summary), competition.title,
-                     folder=self.settings.output_dir / competition.directory)
+                     folder=self._html_folder())
 
     def _results(self):
         try:
-            members = load_members(self.settings.data_dir)
+            members = load_members(self.club.sailors_file)
         except StorageError:
             members = None                 # still work out the results, just without names
         return competition_results(self.session.competition, self.session.resolver(members))
 
+    def _html_folder(self):
+        """Where this competition's web pages and report go: in the club's output folder."""
+        return self.settings.club_output_dir(self.club.abbreviation) / self.session.competition.directory
+
     def _race_day_options(self) -> dict:
-        """Where the race day window's Export HTML writes, and the titles for its page."""
-        competition = self.session.competition
-        return {"html_folder": self.settings.output_dir / competition.directory,
-                "competition_title": competition.title, "club_title": self.settings.title}
+        """Where the race day window's Export HTML writes, and the titles and logo for its page."""
+        return {"html_folder": self._html_folder(), "competition_title": self.session.competition.title,
+                "club_title": self.club.title, "logo": self.club.logo}
 
     def _load_members(self) -> MemberList | None:
         """Read the club's sail numbers afresh, so changes to the file are picked up."""
         try:
-            members = load_members(self.settings.data_dir)
+            members = load_members(self.club.sailors_file)
         except StorageError as exc:
             messagebox.showerror("Club sailors", str(exc), parent=self)
             return None

@@ -8,7 +8,7 @@ from app.model.race_day import RaceDay, default_races
 
 def comp(**changes) -> Competition:
     details = dict(name="Victoria DF65 2026", year=2026, classes=["DF65", "Victoria"],
-                   clubs=["RMBC"], race_count=24, directory="Victoria2026")
+                   race_count=24, directory="Victoria2026")
     details.update(changes)
     return Competition(**details)
 
@@ -34,16 +34,14 @@ class HelperTests(unittest.TestCase):
 
 class CompetitionTests(unittest.TestCase):
     def test_details(self):
-        c = comp(name="  Victoria_df65_competition_2026 ", classes=[" df65", "victoria", "DF 65"],
-                 clubs=["RMBC", "rmbc", " "])
+        c = comp(name="  Victoria_df65_competition_2026 ", classes=[" df65", "victoria", "DF 65"])
         self.assertEqual(c.title, "Victoria_df65_competition_2026")
         self.assertEqual(c.classes, ["df65", "victoria"])           # repeats and blanks dropped
-        self.assertEqual(c.clubs, ["RMBC"])
         self.assertEqual((c.race_count, c.directory), (24, "Victoria2026"))
 
     def test_optional_details(self):
         c = Competition("DF95 2026", 2026, ["DF95"])
-        self.assertEqual((c.clubs, c.race_count, c.directory), ([], None, "DF95_2026"))
+        self.assertEqual((c.race_count, c.directory), (None, "DF95_2026"))
 
     def test_directory_is_a_single_safe_folder_name(self):
         self.assertEqual(comp(directory="../../etc").directory, "etc")

@@ -5,12 +5,13 @@ from pathlib import Path
 from app.model.limits import DEFAULT_RACES, DEFAULT_ROWS, MAX_RACES
 from app.storage.settings_store import (
     DATA_DIR,
-    DEFAULT_TITLE,
     PROPERTIES_FILE,
     SYSTEM_FOLDER,
     find_data_dir,
     load_settings,
     move_old_data_dir,
+    old_title,
+    save_settings,
 )
 
 
@@ -27,23 +28,37 @@ class SettingsTests(unittest.TestCase):
     def test_creates_folder_and_default_file(self):
         settings = load_settings(self.dir)
         self.assertTrue((self.dir / PROPERTIES_FILE).exists())
-        self.assertEqual((settings.title, settings.default_rows, settings.default_columns),
-                         (DEFAULT_TITLE, DEFAULT_ROWS, DEFAULT_RACES))
+        self.assertEqual((settings.default_club, settings.default_rows, settings.default_columns),
+                         ("", DEFAULT_ROWS, DEFAULT_RACES))
         self.assertEqual(settings.data_dir, self.dir)
 
     def test_reads_values(self):
-        self.write("<properties><title>RMBC</title><default_rows>8</default_rows>"
+        self.write("<properties><default_club> CwMBC </default_club><default_rows>8</default_rows>"
                    "<default_columns>3</default_columns></properties>")
         settings = load_settings(self.dir)
-        self.assertEqual((settings.title, settings.default_rows, settings.default_columns),
-                         ("RMBC", 8, 3))
+        self.assertEqual((settings.default_club, settings.default_rows, settings.default_columns),
+                         ("CwMBC", 8, 3))
+
+    def test_saves_the_default_club(self):
+        settings = load_settings(self.dir)
+        settings.default_club = "RMBC"
+        self.assertTrue(save_settings(settings))
+        self.assertEqual(load_settings(self.dir).default_club, "RMBC")
+
+    def test_old_title(self):
+        self.write("<properties><title> RMBC Radio Sailing </title></properties>")
+        self.assertEqual(old_title(self.dir), "RMBC Radio Sailing")
+        for default in ("Lakemark", "RC Yacht Race Tables", ""):     # never set: no title
+            self.write(f"<properties><title>{default}</title></properties>")
+            self.assertEqual(old_title(self.dir), "")
+        self.assertEqual(old_title(Path(self._tmp.name) / "missing"), "")
 
     def test_bad_values_fall_back_or_are_limited(self):
-        self.write("<properties><title> </title><default_rows>lots</default_rows>"
+        self.write("<properties><default_club> </default_club><default_rows>lots</default_rows>"
                    "<default_columns>99</default_columns></properties>")
         settings = load_settings(self.dir)
-        self.assertEqual((settings.title, settings.default_rows, settings.default_columns),
-                         (DEFAULT_TITLE, DEFAULT_ROWS, MAX_RACES))
+        self.assertEqual((settings.default_club, settings.default_rows, settings.default_columns),
+                         ("", DEFAULT_ROWS, MAX_RACES))
 
     def test_output_folder(self):
         self.assertEqual(load_settings(self.dir).output_dir,
@@ -51,6 +66,7 @@ class SettingsTests(unittest.TestCase):
         absolute = Path(self._tmp.name) / "results"      # with its drive letter on Windows
         self.write(f"<properties><output_folder>{absolute}</output_folder></properties>")
         self.assertEqual(load_settings(self.dir).output_dir, absolute)
+        self.assertEqual(load_settings(self.dir).club_output_dir("CwMBC"), absolute / "CwMBC")
 
     def test_relative_output_folder_is_beside_the_data_folder(self):
         self.write("<properties><output_folder>results</output_folder></properties>")
@@ -89,8 +105,8 @@ class SettingsTests(unittest.TestCase):
                       (data_dir / PROPERTIES_FILE).read_text(encoding="utf-8"))
 
     def test_broken_file_uses_defaults(self):
-        self.write("<properties><title>")
-        self.assertEqual(load_settings(self.dir).title, DEFAULT_TITLE)
+        self.write("<properties><default_rows>")
+        self.assertEqual(load_settings(self.dir).default_rows, DEFAULT_ROWS)
 
 
 if __name__ == "__main__":

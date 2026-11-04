@@ -10,8 +10,8 @@ from app.model.sail_entry import SailResolver
 from app.services import scoring
 from app.services.scoring import current_results, final_results
 
-ANN = Sailor("   12", "DF95", "Ann", "Smith", "RMBC")
-BOB = Sailor("   07", "DF95", "Bob", "Jones", "RMBC")
+ANN = Sailor("   12", "DF95", "Ann", "Smith")
+BOB = Sailor("   07", "DF95", "Bob", "Jones")
 MEMBERS = MemberList([ANN, BOB])
 
 
@@ -26,7 +26,7 @@ def competition_results(comp: Competition, members: MemberList | None = None,
     resolver = None
     if members is not None:
         boat_classes = [BoatClass(c.lower(), c) for c in (classes or comp.classes)]
-        resolver = SailResolver(members, boat_classes, comp.clubs)
+        resolver = SailResolver(members, boat_classes)
     return scoring.competition_results(comp, resolver)
 
 
@@ -78,17 +78,11 @@ class CompetitionResultsTests(unittest.TestCase):
         self.assertEqual([r.sail_number for r in results.competitors], ["2", "10"])
 
     def test_a_boat_takes_the_class_of_the_sailor(self):
-        cat = Sailor("   09", "iom", "Cat", "Brown", "RMBC")    # shown as the competition writes it
+        cat = Sailor("   09", "iom", "Cat", "Brown")    # shown as the competition writes it
         race_day = day("Race day 1", ["Race A"], [["9"], ["12"], ["99"]])
         results = competition_results(competition(race_day), MemberList([ANN, cat]))
         self.assertEqual([(r.sail_number, r.boat_class, r.name) for r in results.competitors],
                          [("09", "IOM", "Cat Brown"), ("12", "DF95", "Ann Smith"), ("99", "", "")])
-
-    def test_only_sailors_from_the_clubs_are_named(self):
-        dan = Sailor("   05", "DF95", "Dan", "Moor", "Other club")
-        race_day = day("Race day 1", ["Race A"], [["12"], ["5"]])
-        results = competition_results(competition(race_day, clubs=["RMBC"]), MemberList([ANN, dan]))
-        self.assertEqual([r.name for r in results.competitors], ["Ann Smith", ""])
 
     def test_best_races_count(self):
         race_day = day("Race day 1", ["A", "B", "C"], [["12", "7", "7"], ["7", "12", "12"]])
@@ -106,7 +100,7 @@ class CompetitionResultsTests(unittest.TestCase):
     def test_classes_by_full_name_find_the_sailors(self):
         race_day = day("Race day 1", ["Race A"], [["12"]])
         comp = competition(race_day, classes=["df95"])
-        vic = Sailor("   12", "VICTORIA", "Vic", "Toria", "RMBC")
+        vic = Sailor("   12", "VICTORIA", "Vic", "Toria")
         results = competition_results(comp, MemberList([vic]), classes=["Victoria"])
         self.assertEqual([(r.boat_class, r.name) for r in results.competitors], [("Victoria", "Vic Toria")])
 
@@ -128,8 +122,8 @@ class CompetitionResultsTests(unittest.TestCase):
         self.assertEqual(results.left_out, 1)
 
     def test_a_sailors_boats_are_alternatives(self):
-        paul = [Sailor("  440", "DF95", "Paul", "Grundy", "RMBC"),
-                Sailor("   23", "DF95", "Paul", " grundy ", "RMBC")]   # name matched loosely
+        paul = [Sailor("  440", "DF95", "Paul", "Grundy"),
+                Sailor("   23", "DF95", "Paul", " grundy ")]   # name matched loosely
         day1 = day("Race day 1", ["A", "B"], [["440", "12"], ["12", "23"]])
         day2 = day("Race day 2", ["A"], [["23"]])
         results = competition_results(competition(day1, day2), MemberList([ANN, *paul]))
@@ -139,8 +133,8 @@ class CompetitionResultsTests(unittest.TestCase):
                           ("440 / 23", "Paul Grundy", 3, 4, [3, 1])])
 
     def test_a_sailor_in_two_classes_is_one_competitor(self):
-        paul = [Sailor("  440", "DF95", "Paul", "Grundy", "RMBC"),
-                Sailor("   23", "IOM", "Paul", "Grundy", "RMBC")]
+        paul = [Sailor("  440", "DF95", "Paul", "Grundy"),
+                Sailor("   23", "IOM", "Paul", "Grundy")]
         day1 = day("Race day 1", ["A", "B"], [["440", "12"], ["12", "23"]])
         results = competition_results(competition(day1), MemberList([ANN, *paul]),
                                       classes=["DF95", "IOM"])
@@ -150,8 +144,8 @@ class CompetitionResultsTests(unittest.TestCase):
         self.assertEqual(len(results.competitors), 2)
 
     def test_tagged_entries_score_their_sailor(self):
-        gale = Sailor("   29", "DF95", "Paul", "Gale", "RMBC", "PAG")
-        grundy = Sailor("   29", "IOM", "Paul", "Grundy", "RMBC", "PGU")
+        gale = Sailor("   29", "DF95", "Paul", "Gale", "PAG")
+        grundy = Sailor("   29", "IOM", "Paul", "Grundy", "PGU")
         race_day = day("Race day 1", ["A"], [["29/PGU"], ["29/pag"], ["29"]])
         results = competition_results(competition(race_day), MemberList([gale, grundy]))
         self.assertEqual([(r.sail_numbers, r.boat_class, r.name, r.points) for r in results.competitors],

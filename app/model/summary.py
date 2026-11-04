@@ -33,7 +33,6 @@ class CompetitionSummary:
     name: str
     year: int
     classes: list[str]                          # full names
-    clubs: list[str]                            # none: any club
     race_count: int | None                      # best this many races count; None: all
     max_race_days: int
     days: list[DaySummary] = field(default_factory=list)

@@ -1,6 +1,6 @@
 """results_window.py - the results of a competition so far: the current or final table.
 
-    ResultsWindow(parent, results, title, html_folder=..., club_title=...)
+    ResultsWindow(parent, results, title, html_folder=..., club_title=..., logo=...)
 
 One row per competitor (a club sailor in a class, with every sail number they sailed; or a
 sail number that is no club sailor's): its place, its heats and points on each race day, the
@@ -29,12 +29,14 @@ SHORT = {"Heats": "Hts", "Points": "Pts"}     # grouped headings, kept narrow on
 
 class ResultsWindow(tk.Toplevel):
     def __init__(self, parent: tk.Misc, results: Results, title: str,
-                 html_folder: Path | None = None, club_title: str = ""):
+                 html_folder: Path | None = None, club_title: str = "",
+                 logo: Path | None = None):
         super().__init__(parent)
         self.results = results
         self.competition_title = title
         self.html_folder = html_folder
         self.club_title = club_title
+        self.logo = logo
         self.title(f"{title} - {results.title.lower()}")
         self.geometry("880x480")
         self.minsize(500, 300)
@@ -140,7 +142,7 @@ class ResultsWindow(tk.Toplevel):
     def export_html(self) -> None:
         try:
             path = export_results_html(self.html_folder, self.results, club_title=self.club_title,
-                                       competition_title=self.competition_title)
+                                       competition_title=self.competition_title, logo=self.logo)
         except StorageError as exc:
             messagebox.showerror("Export HTML", str(exc), parent=self)
             return

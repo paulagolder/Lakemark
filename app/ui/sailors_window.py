@@ -1,6 +1,6 @@
-"""sailors_window.py - the window for editing the club's sailors (RMBCSail.xml).
+"""sailors_window.py - the window for editing a club's sailors (RMBCSail.xml, say).
 
-    SailorsWindow(parent, data_dir).show()
+    SailorsWindow(parent, club).show()
 
 Pick a sailor in the list to change or delete them, or fill in the boxes and click Add.
 Tag is a short code (initials, if left blank) that tells sailors apart when two of them have the
@@ -13,32 +13,32 @@ Nothing is written until Save is clicked; closing with unsaved changes asks firs
 from __future__ import annotations
 
 import tkinter as tk
-from pathlib import Path
 from tkinter import messagebox, ttk
 
+from ..model.club import Club
 from ..model.member_list import MemberList
 from ..model.sail_number import format_sail_number
-from ..model.sailor import DEFAULT_CLUB, Sailor
+from ..model.sailor import Sailor
 from ..storage.boat_class_store import boat_classes_or_defaults
 from ..storage.errors import StorageError
-from ..storage.member_store import MEMBERS_FILE, load_members, save_members
+from ..storage.member_store import load_members, save_members
 
 ALL_CLASSES = "All classes"
 COLUMNS = [("sail", "Sail number", 90), ("class", "Boat class", 100), ("forename", "Forename", 120),
-           ("surname", "Surname", 130), ("club", "Club", 80), ("tag", "Tag", 50)]
+           ("surname", "Surname", 130), ("tag", "Tag", 50)]
 
 
 class SailorsWindow(tk.Toplevel):
-    def __init__(self, parent: tk.Tk | tk.Toplevel, data_dir):
+    def __init__(self, parent: tk.Tk | tk.Toplevel, club: Club):
         super().__init__(parent)
         self._parent = parent
-        self.data_dir = Path(data_dir)
-        self.title("Club sailors")
+        self.club = club
+        self.title(f"{club.abbreviation} sailors")
         self.transient(parent)
         self.minsize(600, 380)
 
         self.members = MemberList()
-        self._class_names = boat_classes_or_defaults(self.data_dir).names()   # yachtclasses.xml
+        self._class_names = boat_classes_or_defaults(club.classes_file).names()
         self._saved: list[Sailor] = []          # the sailors as last saved, to spot changes
 
         # The class filter
@@ -70,7 +70,6 @@ class SailorsWindow(tk.Toplevel):
         form.pack(fill="x", padx=12, pady=4)
         self.sail_var, self.class_var = tk.StringVar(), tk.StringVar()
         self.forename_var, self.surname_var = tk.StringVar(), tk.StringVar()
-        self.club_var = tk.StringVar(value=DEFAULT_CLUB)
         self.tag_var = tk.StringVar()
         ttk.Label(form, text="Sail number:").grid(row=0, column=0, sticky="w")
         self.sail_entry = ttk.Entry(form, textvariable=self.sail_var, width=8)
@@ -78,9 +77,6 @@ class SailorsWindow(tk.Toplevel):
         ttk.Label(form, text="Boat class:").grid(row=0, column=2, sticky="w")
         self.class_box = ttk.Combobox(form, textvariable=self.class_var, width=12)
         self.class_box.grid(row=0, column=3, sticky="w", padx=(4, 12), pady=2)
-        ttk.Label(form, text="Club:").grid(row=0, column=4, sticky="w")
-        ttk.Entry(form, textvariable=self.club_var, width=10).grid(row=0, column=5, sticky="w",
-                                                                   padx=4, pady=2)
         ttk.Label(form, text="Forename:").grid(row=1, column=0, sticky="w")
         ttk.Entry(form, textvariable=self.forename_var, width=16).grid(row=1, column=1, sticky="w",
                                                                        padx=(4, 12), pady=2)
@@ -153,8 +149,7 @@ class SailorsWindow(tk.Toplevel):
         for i in shown:
             sailor = self.members.sailors[i]
             self.tree.insert("", "end", iid=str(i), values=(
-                sailor.number, sailor.boat_class, sailor.forename, sailor.surname, sailor.club,
-                sailor.tag))
+                sailor.number, sailor.boat_class, sailor.forename, sailor.surname, sailor.tag))
         if select is not None and shown:
             target = next((i for i in shown if i >= select), shown[-1])
             self.tree.selection_set(str(target))
@@ -171,7 +166,6 @@ class SailorsWindow(tk.Toplevel):
             self.class_var.set(sailor.boat_class)
             self.forename_var.set(sailor.forename)
             self.surname_var.set(sailor.surname)
-            self.club_var.set(sailor.club)
             self.tag_var.set(sailor.tag)
         unsaved = " (not saved yet)" if self._unsaved() else ""
         total = len(self.members)
@@ -184,7 +178,7 @@ class SailorsWindow(tk.Toplevel):
 
     def _clear_form(self) -> None:
         self.tree.selection_remove(*self.tree.selection())
-        for var in (self.sail_var, self.forename_var, self.surname_var, self.tag_var):  # class, club stay
+        for var in (self.sail_var, self.forename_var, self.surname_var, self.tag_var):  # class stays
             var.set("")
         self.sail_entry.focus_set()
 
@@ -194,7 +188,7 @@ class SailorsWindow(tk.Toplevel):
         sail = self.sail_var.get().strip()
         return Sailor(format_sail_number(sail) if sail else "", self.class_var.get().strip(),
                       self.forename_var.get().strip(), self.surname_var.get().strip(),
-                      self.club_var.get().strip(), self.tag_var.get())
+                      self.tag_var.get())
 
     def _unsaved(self) -> bool:
         return self.members.sailors != self._saved
@@ -238,13 +232,13 @@ class SailorsWindow(tk.Toplevel):
 
     def save(self) -> bool:
         try:
-            save_members(self.members, self.data_dir)
+            save_members(self.members, self.club.sailors_file)
         except StorageError as exc:
             messagebox.showerror("Cannot save", str(exc), parent=self)
             return False
         self._saved = list(self.members.sailors)
         self._selection_changed()
-        self.status_var.set(f"{len(self.members)} sailors, saved to {MEMBERS_FILE}")
+        self.status_var.set(f"{len(self.members)} sailors, saved to {self.club.sailors_file.name}")
         return True
 
     def _close(self) -> None:
@@ -260,7 +254,7 @@ class SailorsWindow(tk.Toplevel):
     def show(self) -> bool:
         """Load the file and show the window until it is closed. False if the file can't be read."""
         try:
-            self.members = load_members(self.data_dir)
+            self.members = load_members(self.club.sailors_file)
         except StorageError as exc:
             self.destroy()
             messagebox.showerror("Club sailors", str(exc), parent=self._parent)

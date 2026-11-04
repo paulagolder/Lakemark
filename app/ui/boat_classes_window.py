@@ -1,6 +1,6 @@
-"""boat_classes_window.py - the window for editing the club's boat classes (yachtclasses.xml).
+"""boat_classes_window.py - the window for editing a club's boat classes (RMBCClasses.xml, say).
 
-    BoatClassesWindow(parent, data_dir).show()
+    BoatClassesWindow(parent, club).show()
 
 Pick a class in the list to change or delete it, or fill in the boxes and click Add.
 Nothing is written until Save is clicked; closing with unsaved changes asks first.
@@ -9,11 +9,11 @@ Nothing is written until Save is clicked; closing with unsaved changes asks firs
 from __future__ import annotations
 
 import tkinter as tk
-from pathlib import Path
 from tkinter import messagebox, ttk
 
 from ..model.boat_class import BoatClass, BoatClassList
-from ..storage.boat_class_store import BOAT_CLASSES_FILE, load_boat_classes, save_boat_classes
+from ..model.club import Club
+from ..storage.boat_class_store import load_boat_classes, save_boat_classes
 from ..storage.errors import StorageError
 
 COLUMNS = [("key", "Key", 100), ("fullname", "Full name", 140), ("cypher", "Cypher", 80),
@@ -21,11 +21,11 @@ COLUMNS = [("key", "Key", 100), ("fullname", "Full name", 140), ("cypher", "Cyph
 
 
 class BoatClassesWindow(tk.Toplevel):
-    def __init__(self, parent: tk.Tk | tk.Toplevel, data_dir):
+    def __init__(self, parent: tk.Tk | tk.Toplevel, club: Club):
         super().__init__(parent)
         self._parent = parent
-        self.data_dir = Path(data_dir)
-        self.title("Boat classes")
+        self.club = club
+        self.title(f"{club.abbreviation} boat classes")
         self.transient(parent)
         self.minsize(460, 340)
 
@@ -168,13 +168,13 @@ class BoatClassesWindow(tk.Toplevel):
 
     def save(self) -> bool:
         try:
-            save_boat_classes(self.boat_classes, self.data_dir)
+            save_boat_classes(self.boat_classes, self.club.classes_file)
         except StorageError as exc:
             messagebox.showerror("Cannot save", str(exc), parent=self)
             return False
         self._saved = list(self.boat_classes.classes)
         self._selection_changed()
-        self.status_var.set(f"{len(self.boat_classes)} classes, saved to {BOAT_CLASSES_FILE}")
+        self.status_var.set(f"{len(self.boat_classes)} classes, saved to {self.club.classes_file.name}")
         return True
 
     def _close(self) -> None:
@@ -190,7 +190,7 @@ class BoatClassesWindow(tk.Toplevel):
     def show(self) -> bool:
         """Load the file and show the window until it is closed. False if the file can't be read."""
         try:
-            self.boat_classes = load_boat_classes(self.data_dir)
+            self.boat_classes = load_boat_classes(self.club.classes_file)
         except StorageError as exc:
             self.destroy()
             messagebox.showerror("Boat classes", str(exc), parent=self._parent)

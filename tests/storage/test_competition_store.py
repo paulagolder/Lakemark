@@ -114,15 +114,15 @@ class StorageTests(unittest.TestCase):
                     load_competition(self.write(xml))
 
     def test_file_layout(self):
-        comp = Competition("Victoria_df65_competition_2026", 2026, ["df65", "victoria"], ["RMBC"],
-                           24, "Victoria2026")
+        comp = Competition("Victoria_df65_competition_2026", 2026, ["df65", "victoria"], 24,
+                           "Victoria2026")
         comp.add_race_day(RaceDay.from_table("Race day 1", ["Race A", "Race B"],
                                              [["12", "7"], ["", ""], ["7", ""]]))
         comp.add_race_day(RaceDay("Race day 2", default_races(1)))
         save_competition(comp, self.path)
         text = self.path.read_text(encoding="utf-8")
         self.assertIn('<competition year="2026" name="Victoria_df65_competition_2026" racecount="24" '
-                      'clubs="RMBC" directory="Victoria2026" classes="df65,victoria" version="3">', text)
+                      'directory="Victoria2026" classes="df65,victoria" version="3">', text)
         self.assertIn('  <raceday name="Race day 1">\n    <race name="Race A">\n'
                       '      <sail>12</sail>\n      <sail />\n      <sail>7</sail>\n    </race>', text)
         self.assertIn('    <race name="Race B">\n      <sail>7</sail>\n    </race>', text)
@@ -140,13 +140,14 @@ class StorageTests(unittest.TestCase):
                '<raceday name="d" class="victoria"><race name="A"><sail>3</sail></race></raceday>'
                '<raceday name="e"><race name="A"><sail>7</sail></race></raceday></competition>')
         comp = load_competition(self.write(xml))
-        self.assertEqual((comp.name, comp.year, comp.classes, comp.clubs, comp.race_count,
-                          comp.directory),
-                         ("Victoria_df65_competition_2026", 2026, ["df65", "victoria"], ["RMBC"], 24,
+        self.assertEqual((comp.name, comp.year, comp.classes, comp.race_count, comp.directory),
+                         ("Victoria_df65_competition_2026", 2026, ["df65", "victoria"], 24,
                           "Victoria2026"))
         self.assertEqual([d.name for d in comp.race_days], ["d", "e"])     # class="..." ignored
         save_competition(comp, self.path)
-        self.assertNotIn("class=", self.path.read_text(encoding="utf-8").replace("classes=", ""))
+        text = self.path.read_text(encoding="utf-8")
+        self.assertNotIn("class=", text.replace("classes=", ""))
+        self.assertNotIn("clubs=", text)                    # from before 1.05: dropped
 
     def test_race_day_date(self):
         comp = simple("DF95", 2026)
@@ -243,7 +244,7 @@ class StorageTests(unittest.TestCase):
         old = self.dir / "DF95_2026.cxml"
         save_competition(sample(), old)
         save_competition(sample(), old)                 # makes a .bak
-        details = Competition("Spring series", 2026, ["IOM", "DF95"], ["RMBC"], 10, "spring")
+        details = Competition("Spring series", 2026, ["IOM", "DF95"], 10, "spring")
         new = update_competition_details(old, details)
         self.assertEqual(new.name, "Spring_series.cxml")
         self.assertFalse(old.exists())

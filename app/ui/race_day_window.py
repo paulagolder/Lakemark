@@ -8,7 +8,7 @@ Up go the other way. The window is modal: the window behind it is blocked until 
 
 The race day is open to all the competition's classes, which are shown but cannot be changed
 here (change them in the competition's details). Each cell holds a sail number. Given a
-SailResolver (the club sailors, classes and clubs), the window shows whose boat the current cell
+SailResolver (the club sailors and classes), the window shows whose boat the current cell
 is and marks entries that are unrecognised, ambiguous or repeated in a race; it will not save
 until they are fixed. A sail number that could be more than one sailor's opens a list to choose
 from as the cursor leaves the cell, and is tagged to say which ("12/PAG", "12@").
@@ -46,7 +46,7 @@ class RaceDayWindow(tk.Toplevel):
     def __init__(self, parent: tk.Tk | tk.Toplevel, race_day: RaceDay, title: str = "Edit race day",
                  default_rows: int = DEFAULT_ROWS, resolver: SailResolver | None = None,
                  html_folder: Path | None = None, competition_title: str = "",
-                 club_title: str = ""):
+                 club_title: str = "", logo: Path | None = None):
         super().__init__(parent)
         self._parent = parent
         self.title(title)
@@ -59,6 +59,7 @@ class RaceDayWindow(tk.Toplevel):
         self.html_folder = html_folder              # Export HTML writes here (None: no button)
         self.competition_title = competition_title
         self.club_title = club_title
+        self.logo = logo                            # the club's logo, for Export HTML
         ttk.Style(self).configure(BAD_STYLE, fieldbackground="#f6c6c6", foreground="#9c0000")
 
         self.columns: list[str] = list(race_day.columns)    # race names
@@ -260,8 +261,7 @@ class RaceDayWindow(tk.Toplevel):
             self.sailor_var.set("Could be " + "; ".join(resolver.describe(s) for s in sailors)
                                 + ". Press Enter to choose.")
         else:
-            clubs = f" from {', '.join(resolver.clubs)}" if resolver.clubs else ""
-            self.sailor_var.set(f"Unrecognised sail '{value}': no {classes} sailor{clubs} has it.")
+            self.sailor_var.set(f"Unrecognised sail '{value}': no {classes} sailor has it.")
 
     def _resolve(self, entry: ttk.Entry) -> bool:
         """If the cell's sail could be more than one sailor's, ask which and tag it. False if
@@ -363,7 +363,7 @@ class RaceDayWindow(tk.Toplevel):
             path = export_race_day_html(
                 self.html_folder, day, club_title=self.club_title,
                 competition_title=self.competition_title,
-                resolver=self.resolver)
+                resolver=self.resolver, logo=self.logo)
         except StorageError as exc:
             messagebox.showerror("Export HTML", str(exc), parent=self)
             return

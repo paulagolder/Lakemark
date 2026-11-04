@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Start the program:
 
-    python main.py                   (lists the competitions in ~/.lakemark)
+    python main.py                   (opens the default club, in ~/.lakemark)
+    python main.py --club CwMBC      (opens that club instead: one launcher for each club)
     python main.py --version         (prints the version and its date)
     python main.py --data FOLDER     (uses FOLDER as the data folder instead)
 
@@ -65,14 +66,17 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--data", metavar="FOLDER", type=Path,
                         help="the data folder (default: a system folder beside the program, "
                              "otherwise ~/.lakemark)")
+    parser.add_argument("--club", metavar="ABBREVIATION",
+                        help="the club to open, such as RMBC or CwMBC (default: the club "
+                             "chosen with Club > Open with ... when the program starts)")
     args = parser.parse_args(argv)
 
     from app.storage.settings_store import DATA_DIR, find_data_dir, move_old_data_dir
-    from app.ui.front_window import FrontWindow     # only once a window is wanted
+    from app.ui.start import run                    # only once a window is wanted
     data_dir = args.data or find_data_dir(program_dir())
     if data_dir == DATA_DIR:
         data_dir = move_old_data_dir()
-    FrontWindow(data_dir).mainloop()
+    run(data_dir, args.club)
 
 
 def program_dir() -> Path:

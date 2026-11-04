@@ -7,10 +7,16 @@ the program needs:
     lakemark             the program (Linux). Double-click it, or run it from a terminal.
     output/              the web pages you export: results, race days, reports.
                          This is the only folder you need to open.
-    system/              the program's own files: settings, club sailors, competitions.
-                         Leave this folder alone; the program looks after it.
+    system/              the program's own files: settings, and a folder for each club
+                         with its sailors, classes and competitions. Leave this folder
+                         alone; the program looks after it.
 
 Keep the three together: copy or back up the whole Lakemark folder.
+
+The program opens with the default club (the Club menu switches club, and sets which one it
+opens with). To open a particular club, start it with the club's abbreviation:
+
+    lakemark --club CwMBC
 Close the program before you unplug the USB stick.
 
 If the program will not start

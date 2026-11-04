@@ -1,8 +1,9 @@
 """session.py - an open competition file, and the boat classes it is read with.
 
-When a file is opened its classes are normalised to class ids (keys in yachtclasses.xml), so
+When a file is opened its classes are normalised to class ids (keys in the club's classes
+file), so
 a file written as classes="Victoria,DF65" is treated as ["df65", "victoria"]. A class that is
-not in yachtclasses.xml is kept as it is.
+not in the classes file is kept as it is.
 
 Every change is saved to the file straight away ("after editing the competition file is
 updated"). If a change cannot be saved, or is invalid, it is undone in memory as well and the
@@ -30,7 +31,7 @@ class CompetitionSession:
         try:
             competition.classes = self.boat_classes.normalise(competition.classes)
         except ValueError:
-            pass                    # a class that is not in yachtclasses.xml: leave them as written
+            pass                    # a class that is not in the classes file: leave them as written
 
     @property
     def class_names(self) -> list[str]:
@@ -39,12 +40,12 @@ class CompetitionSession:
 
     @property
     def class_objects(self) -> list[BoatClass]:
-        """The competition's classes from yachtclasses.xml (one that is not there: just its id)."""
+        """The competition's classes from the classes file (one that is not there: just its id)."""
         return [self.boat_classes.find(c) or BoatClass(c, c) for c in self.competition.classes]
 
     def resolver(self, members: MemberList | None) -> SailResolver:
         """Reads the competition's sail entries against these club sailors."""
-        return SailResolver(members, self.class_objects, self.competition.clubs)
+        return SailResolver(members, self.class_objects)
 
     # -- opening and creating -------------------------------------------------------------
 

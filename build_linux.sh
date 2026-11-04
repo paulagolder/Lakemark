@@ -15,7 +15,8 @@ cd "$(dirname "$0")"
 echo "Running the tests..."
 python3 -m unittest discover -s tests -t . -q
 
-# The club logo: Tk 8.6 cannot show SVG, so the window uses a PNG made from it.
+# RMBC's logo: Tk 8.6 cannot show SVG, so the program uses a PNG made from it (given to the
+# RMBC club folder made from a data folder from before 1.05).
 # Remade here when ImageMagick is installed; otherwise the PNG already in the project is used.
 logo=app/resources/club_logo
 if command -v convert >/dev/null && [ "$logo.svg" -nt "$logo.png" ]; then
@@ -44,5 +45,5 @@ echo "Done: $(pwd)/dist/lakemark"
 echo "Copy it anywhere (for example ~/.local/bin) and run it."
 echo
 echo "Portable copy: $(pwd)/$portable"
-echo "Copy the whole folder to a USB stick. Add the club's files (RMBCSail.xml, properties.xml,"
-echo "yachtclasses.xml, competitions) to its system folder."
+echo "Copy the whole folder to a USB stick, and add properties.xml and the club folders"
+echo "(RMBC/, CwMBC/ ...) to its system folder: ./make_stick.sh does both."

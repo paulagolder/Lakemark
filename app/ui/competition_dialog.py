@@ -3,8 +3,8 @@
     details = CompetitionDialog(parent).show()      # a Competition with no race days, or None
 
 Also used to change a competition's details: pass the competition and a window title.
-Classes and clubs are typed as lists separated by commas. Each class may be typed by its key
-or full name in any case ("df65", "DF 65"); they must all be in yachtclasses.xml, and are
+Classes are typed as a list separated by commas. Each class may be typed by its key or full
+name in any case ("df65", "DF 65"); they must all be in the club's classes file, and are
 stored as class ids, without repeats, in that file's order. Left blank, the name is made from
 the classes and year, Races counted means every race counts, and the HTML folder is made
 from the name.
@@ -19,7 +19,6 @@ from tkinter import messagebox, ttk
 from ..model.boat_class import DEFAULT_BOAT_CLASSES, BoatClassList
 from ..model.competition import Competition, split_list
 from ..model.limits import MAX_YEAR, MIN_YEAR
-from ..model.sailor import DEFAULT_CLUB
 
 HINT = {"foreground": "gray40"}
 
@@ -43,7 +42,6 @@ class CompetitionDialog(tk.Toplevel):
         self.year_var = tk.StringVar(value=str(comp.year if comp else datetime.date.today().year))
         self.classes_var = tk.StringVar(value=", ".join(self.boat_classes.display_names(comp.classes))
                                         if comp else names[0])
-        self.clubs_var = tk.StringVar(value=", ".join(comp.clubs) if comp else DEFAULT_CLUB)
         self.count_var = tk.StringVar(value=str(comp.race_count or "") if comp else "")
         self.directory_var = tk.StringVar(value=comp.directory if comp else "")
 
@@ -54,11 +52,9 @@ class CompetitionDialog(tk.Toplevel):
         self._row(frame, 2, "Boat classes:", ttk.Entry(frame, textvariable=self.classes_var,
                                                        width=34),
                   f"separated by commas, from: {', '.join(names)}")
-        self._row(frame, 3, "Clubs:", ttk.Entry(frame, textvariable=self.clubs_var, width=34),
-                  "only their sailors may race; blank: any club")
-        self._row(frame, 4, "Races counted:", ttk.Entry(frame, textvariable=self.count_var, width=8),
+        self._row(frame, 3, "Races counted:", ttk.Entry(frame, textvariable=self.count_var, width=8),
                   "each boat's best this many races; blank: all")
-        self._row(frame, 5, "HTML folder:", ttk.Entry(frame, textvariable=self.directory_var,
+        self._row(frame, 4, "HTML folder:", ttk.Entry(frame, textvariable=self.directory_var,
                                                       width=34), "for Export HTML; blank: from the name")
 
         buttons = ttk.Frame(frame)
@@ -98,8 +94,8 @@ class CompetitionDialog(tk.Toplevel):
         name = (self.name_var.get().strip()
                 or f"{' '.join(self.boat_classes.display_names(classes))} {year}")
         try:
-            self.result = Competition(name, year, classes, split_list(self.clubs_var.get()),
-                                      race_count, self.directory_var.get())
+            self.result = Competition(name, year, classes, race_count,
+                                      self.directory_var.get())
         except ValueError as exc:
             messagebox.showwarning(self._title, str(exc), parent=self)
             return

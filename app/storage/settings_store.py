@@ -1,24 +1,30 @@
 """settings_store.py - the settings: the data folder and its properties.xml.
 
-Competition files live in ~/.lakemark by default. That folder also holds properties.xml:
+The data folder is ~/.lakemark by default. It holds a folder for each club (see
+model/club.py) and properties.xml, the settings for every club:
 
     <properties>
-      <title>Lakemark</title>
+      <default_club>RMBC</default_club>
       <default_rows>5</default_rows>
       <default_columns>4</default_columns>
       <output_folder>~/Documents/lakemark_output</output_folder>
     </properties>
 
-output_folder is where Export HTML writes, in a sub folder named after the competition file
-(for example ~/Documents/lakemark_output/DF95_2026/). ~ and $VARIABLES are expanded. A
-relative folder ("output") is in the folder that holds the data folder.
+default_club is the club the program opens with, unless it is started with --club.
+
+output_folder is where Export HTML writes, in a sub folder for the club and one for the
+competition (for example ~/Documents/lakemark_output/RMBC/DF95_2026/). ~ and $VARIABLES are
+expanded. A relative folder ("output") is in the folder that holds the data folder.
+
+Before version 1.05 properties.xml also had the club's <title>; it is now in the club's own
+folder, and old_title reads it from an old file so it can be moved there.
 
 A portable copy (on a USB stick, say) keeps everything together:
 
     Lakemark/
         lakemark             the program
         output/              the exported web pages: the only folder a user needs
-        system/              the data folder: properties.xml, the sailors, the competitions
+        system/              the data folder: properties.xml and a folder for each club
 
 The program uses a system folder beside it as its data folder (find_data_dir), with the
 default output_folder "output".
@@ -42,17 +48,19 @@ from .xml_file import parse_xml
 DATA_DIR = Path.home() / ".lakemark"
 OLD_DATA_DIR = Path.home() / ".pyraceresults"   # the data folder before version 1.04
 PROPERTIES_FILE = "properties.xml"
-DEFAULT_TITLE = "Lakemark"
+DEFAULT_TITLE = "Lakemark"               # the program's windows, before a club is chosen
 DEFAULT_OUTPUT_FOLDER = "~/Documents/lakemark_output"
 SYSTEM_FOLDER = "system"                 # beside the program: a portable copy's data folder
 PORTABLE_OUTPUT_FOLDER = "output"        # beside the program, in a portable copy
-LOGO_FILE = Path(__file__).parent.parent / "resources" / "club_logo.png"   # made from club_logo.svg
+# RMBC's logo, made from club_logo.svg. Before 1.05 every copy showed it; now each club has
+# its own, and this one is only given to the RMBC folder made from an old data folder.
+RMBC_LOGO_FILE = Path(__file__).parent.parent / "resources" / "club_logo.png"
 
 
 @dataclass
 class Settings:
     data_dir: Path
-    title: str = DEFAULT_TITLE
+    default_club: str = ""                           # blank: the first club
     default_rows: int = DEFAULT_ROWS
     default_columns: int = DEFAULT_RACES             # races in a new race day
     output_folder: str = DEFAULT_OUTPUT_FOLDER       # as written in the file, perhaps with ~
@@ -61,6 +69,10 @@ class Settings:
     def output_dir(self) -> Path:
         """The output folder; a relative one is beside the data folder."""
         return self.data_dir.parent / os.path.expandvars(os.path.expanduser(self.output_folder))
+
+    def club_output_dir(self, abbreviation: str) -> Path:
+        """Where Export HTML writes for a club: a sub folder of the output folder."""
+        return self.output_dir / abbreviation
 
 
 def find_data_dir(program_dir) -> Path:
@@ -96,7 +108,7 @@ def _number(root: ET.Element, tag: str, default: int, maximum: int) -> int:
 def settings_from_xml(root: ET.Element, data_dir: Path) -> Settings:
     return Settings(
         data_dir=data_dir,
-        title=(root.findtext("title") or "").strip() or DEFAULT_TITLE,
+        default_club=(root.findtext("default_club") or "").strip(),
         default_rows=_number(root, "default_rows", DEFAULT_ROWS, MAX_PLACES),
         default_columns=_number(root, "default_columns", DEFAULT_RACES, MAX_RACES),
         output_folder=(root.findtext("output_folder") or "").strip() or _default_output(data_dir),
@@ -105,11 +117,34 @@ def settings_from_xml(root: ET.Element, data_dir: Path) -> Settings:
 
 def settings_to_xml(settings: Settings) -> ET.Element:
     root = ET.Element("properties")
-    ET.SubElement(root, "title").text = settings.title
+    ET.SubElement(root, "default_club").text = settings.default_club
     ET.SubElement(root, "default_rows").text = str(settings.default_rows)
     ET.SubElement(root, "default_columns").text = str(settings.default_columns)
     ET.SubElement(root, "output_folder").text = settings.output_folder
     return root
+
+
+def save_settings(settings: Settings) -> bool:
+    """Write data_dir/properties.xml. False if it cannot be written (the settings still hold
+    for this run)."""
+    root = settings_to_xml(settings)
+    ET.indent(root)
+    try:
+        settings.data_dir.mkdir(parents=True, exist_ok=True)
+        ET.ElementTree(root).write(settings.data_dir / PROPERTIES_FILE, encoding="utf-8",
+                                   xml_declaration=True)
+    except OSError:
+        return False
+    return True
+
+
+def old_title(data_dir) -> str:
+    """The <title> in a properties.xml from before 1.05 (blank if none, or the default)."""
+    try:
+        title = (parse_xml(Path(data_dir) / PROPERTIES_FILE).findtext("title") or "").strip()
+    except (OSError, ET.ParseError):
+        return ""
+    return "" if title in (DEFAULT_TITLE, "RC Yacht Race Tables") else title
 
 
 def load_settings(data_dir=DATA_DIR) -> Settings:
@@ -122,10 +157,8 @@ def load_settings(data_dir=DATA_DIR) -> Settings:
     defaults = Settings(data_dir, output_folder=_default_output(data_dir))
     try:
         data_dir.mkdir(parents=True, exist_ok=True)
-        if not path.exists():
-            root = settings_to_xml(defaults)
-            ET.indent(root)
-            ET.ElementTree(root).write(path, encoding="utf-8", xml_declaration=True)
+        if not path.exists() and not save_settings(defaults):
+            return defaults
         return settings_from_xml(parse_xml(path), data_dir)
     except (OSError, ET.ParseError):
         return defaults

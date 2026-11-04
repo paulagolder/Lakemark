@@ -1,14 +1,14 @@
 """html_export.py - a race day's table, or a competition's results, as a web page.
 
     path = export_race_day_html(folder, race_day, club_title=..., competition_title=...,
-                                resolver=...)
+                                resolver=..., logo=...)
     path = export_results_html(folder, results, club_title=..., competition_title=...)
                                     # results_current.html or results_final.html
     path = export_results_html(folder, results, abridged=True, ...)
                                     # the totals only: results_current_abridged.html ...
 
 resolver (a sail_entry.SailResolver, CompetitionSession.resolver) knows the competition's classes
-and finds the sailor each entry means.
+and finds the sailor each entry means. logo is the club's logo file (Club.logo; None: no logo).
 
 Each page is a single file (styles and club logo included), so it can be emailed, put on a
 website or printed as it is. On a race day's page each sail number is shown with its sailor's
@@ -27,7 +27,6 @@ from ..model.race_day import RaceDay
 from ..model.results import ALL, Results
 from ..model.sail_entry import SailResolver
 from ..storage.errors import StorageError
-from ..storage.settings_store import LOGO_FILE
 from .results_table import day_dates, results_note, total_columns, total_groups, total_values
 
 STYLE = """
@@ -66,12 +65,15 @@ def race_day_filename(day_name: str) -> str:
     return f"{safe}.html"
 
 
-def _logo_tag() -> str:
+def _logo_tag(logo: Path | None) -> str:
+    if logo is None:
+        return ""
     try:
-        data = base64.b64encode(LOGO_FILE.read_bytes()).decode("ascii")
+        data = base64.b64encode(Path(logo).read_bytes()).decode("ascii")
     except OSError:
         return ""
-    return f'<img src="data:image/png;base64,{data}" alt="">'
+    kind = "gif" if Path(logo).suffix.lower() == ".gif" else "png"
+    return f'<img src="data:image/{kind};base64,{data}" alt="">'
 
 
 def _cell(value: str, resolver: SailResolver | None) -> str:
@@ -84,7 +86,7 @@ def _cell(value: str, resolver: SailResolver | None) -> str:
 
 
 def race_day_html(race_day: RaceDay, *, club_title: str, competition_title: str,
-                  resolver: SailResolver | None = None,
+                  resolver: SailResolver | None = None, logo: Path | None = None,
                   generated: datetime.datetime | None = None) -> str:
     generated = generated or datetime.datetime.now()
     e = html.escape
@@ -98,11 +100,12 @@ def race_day_html(race_day: RaceDay, *, club_title: str, competition_title: str,
         for number, row in enumerate(race_day.rows, start=1))
     table = f"<thead><tr><th>Row</th>{head}</tr></thead>\n<tbody>\n{body}\n</tbody>"
     return _page(f"{competition_title} - {day_name}", competition_title, subtitle, "", table,
-                 club_title, generated)
+                 club_title, logo, generated)
 
 
 def results_html(results: Results, *, club_title: str, competition_title: str,
-                 abridged: bool = False, generated: datetime.datetime | None = None) -> str:
+                 abridged: bool = False, logo: Path | None = None,
+                 generated: datetime.datetime | None = None) -> str:
     """The results table (current or final): place, boat, heats and points each race day, and
     totals. Abridged: without the race days."""
     generated = generated or datetime.datetime.now()
@@ -144,7 +147,8 @@ def results_html(results: Results, *, club_title: str, competition_title: str,
     title = f"{results.title} at {generated.day} {generated:%B %Y}"   # which day's table it is
     note = results_note(results)
     return _page(f"{competition_title} - {title}", competition_title, e(title),
-                 f'<p class="note">{e(note)}</p>' if note else "", table, club_title, generated)
+                 f'<p class="note">{e(note)}</p>' if note else "", table, club_title, logo,
+                 generated)
 
 
 def _total_class(heading: str, ranked_by: bool) -> str:
@@ -153,7 +157,7 @@ def _total_class(heading: str, ranked_by: bool) -> str:
 
 
 def _page(title: str, heading: str, subtitle: str, before_table: str, table: str,
-          club_title: str, generated: datetime.datetime) -> str:
+          club_title: str, logo: Path | None, generated: datetime.datetime) -> str:
     """A whole page; subtitle, before_table and table are HTML already, the rest is text."""
     e = html.escape
     return f"""<!DOCTYPE html>
@@ -166,7 +170,7 @@ def _page(title: str, heading: str, subtitle: str, before_table: str, table: str
 </head>
 <body>
 <header>
-{_logo_tag()}
+{_logo_tag(logo)}
 <div>
 <h1>{e(heading)}</h1>
 <h2>{subtitle}</h2>

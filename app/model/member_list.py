@@ -1,4 +1,4 @@
-"""member_list.py - the club's sailors (RMBCSail.xml), one per boat.
+"""member_list.py - the club's sailors (RMBCSail.xml, say), one per boat.
 
 Race results are checked against them by sail_entry.SailResolver.
 """
@@ -26,15 +26,9 @@ class MemberList:
 
     # -- finding ----------------------------------------------------------------------------
 
-    def find(self, sail_number: str, boat_class: str, clubs: list[str] | None = None) -> Sailor | None:
-        """The sailor with this sail number in this class, or None.
-
-        Given clubs, only a sailor from one of them is found (none listed: any club).
-        """
-        sailor = self._index.get((class_key(boat_class), sail_key(sail_number)))
-        if sailor is not None and clubs and class_key(sailor.club) not in {class_key(c) for c in clubs}:
-            return None
-        return sailor
+    def find(self, sail_number: str, boat_class: str) -> Sailor | None:
+        """The sailor with this sail number in this class, or None."""
+        return self._index.get((class_key(boat_class), sail_key(sail_number)))
 
     def boat_classes(self) -> list[str]:
         """Every class in the list, as first written, in alphabetical order."""

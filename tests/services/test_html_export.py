@@ -17,13 +17,13 @@ from app.services.html_export import (
     results_html,
 )
 
-MEMBERS = MemberList([Sailor("   03", "DF95", "Rosie", "Keel", "RMBC")])
+MEMBERS = MemberList([Sailor("   03", "DF95", "Rosie", "Keel")])
 DF95, IOM = BoatClass("df95", "DF95"), BoatClass("iom", "IOM")
 
 
-def page(classes=(DF95,), clubs=("RMBC",)) -> dict:
+def page(classes=(DF95,), **changes) -> dict:
     return dict(club_title="RMBC <club>", competition_title="DF95 2026",
-                resolver=SailResolver(MEMBERS, list(classes), list(clubs)),
+                resolver=SailResolver(MEMBERS, list(classes)), **changes,
                 generated=datetime.datetime(2026, 10, 16, 19, 45))
 
 
@@ -50,13 +50,24 @@ class HtmlExportTests(unittest.TestCase):
         self.assertIn('<td><span class="sail">99</span></td>', page)   # unknown: no name
         self.assertIn('<tr><td class="row">2</td>', page)
 
-    def test_names_use_the_competitions_classes_and_clubs(self):
+    def test_names_use_the_competitions_classes(self):
         self.assertNotIn("Rosie Keel", race_day_html(day("d", [["3"]]), **page([IOM])))
         both = race_day_html(day("d", [["3"]]), **page([IOM, DF95]))
         self.assertIn("Rosie Keel", both)
         self.assertIn("<h2>d &middot; IOM, DF95</h2>", both)
-        other_club = race_day_html(day("d", [["3", "3"]]), **page(clubs=["Other"]))
-        self.assertNotIn("Rosie Keel", other_club)
+
+    def test_the_clubs_logo(self):
+        self.assertNotIn("<img", race_day_html(day("d", [["3"]]), **PAGE))     # no logo
+        with tempfile.TemporaryDirectory() as tmp:
+            png, gif = Path(tmp) / "RMBCLogo.png", Path(tmp) / "CwMBCLogo.gif"
+            png.write_bytes(b"png picture")
+            gif.write_bytes(b"gif picture")
+            self.assertIn('<img src="data:image/png;base64,cG5nIHBpY3R1cmU=" alt="">',
+                          race_day_html(day("d", [["3"]]), **page(logo=png)))
+            self.assertIn('src="data:image/gif;base64,',
+                          race_day_html(day("d", [["3"]]), **page(logo=gif)))
+            self.assertNotIn("<img", race_day_html(day("d", [["3"]]),
+                                                   **page(logo=Path(tmp) / "missing.png")))
 
     def test_export_makes_folder_and_replaces_page(self):
         with tempfile.TemporaryDirectory() as tmp:

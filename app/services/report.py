@@ -26,7 +26,7 @@ def competition_summary(competition: Competition, results: Results,
     """results are every boat's (scoring.competition_results). class_names are the
     competition's classes by their full names (default: as stored)."""
     summary = CompetitionSummary(competition.name, competition.year,
-                                 list(class_names or competition.classes), list(competition.clubs),
+                                 list(class_names or competition.classes),
                                  competition.race_count, MAX_RACE_DAYS)
     for d, day in enumerate(competition.race_days):
         finishes = [len(list(race.places())) for race in day.races]
@@ -43,16 +43,14 @@ def competition_summary(competition: Competition, results: Results,
     if competition.race_count:
         summary.qualified = len(final_results(results).competitors)
     return summary
-    return summary
 
 
 def summary_text(summary: CompetitionSummary, generated: datetime.datetime | None = None) -> str:
     generated = generated or datetime.datetime.now()
-    clubs = ", ".join(summary.clubs) or "any club"
     counted = (f"best {summary.race_count} races count" if summary.race_count
                else "every race counts")
     lines = [f"{summary.name} - competition report",
-             f"{summary.year} · {', '.join(summary.classes)} · {clubs} · {counted}",
+             f"{summary.year} · {', '.join(summary.classes)} · {counted}",
              f"Produced {generated:%d %B %Y %H:%M}",
              "",
              f"Race days:    {len(summary.days)} (of {summary.max_race_days})",

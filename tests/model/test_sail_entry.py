@@ -10,18 +10,18 @@ DF65 = BoatClass("df65", "DF65", "65", "#")
 DF95 = BoatClass("df95", "DF95", "95", "@")
 VIC = BoatClass("victoria", "Victoria", "Va", "*")
 
-ANN65 = Sailor("   12", "DF65", "Ann", "Smith", "RMBC")
-ANN95 = Sailor("   12", "DF95", "Ann", "Smith", "RMBC")             # Ann's other boat, also 12
-GALE = Sailor("   29", "DF95", "Paul", "Gale", "RMBC", "PAG")
-GRUNDY = Sailor("   29", "VICTORIA", "Paul", "Grundy", "RMBC", "PGU")
-BOB = Sailor("   07", "DF65", "Bob", "Jones", "RMBC")
-CAT = Sailor("   12", "victoria", "Cat", "Brown", "RMBC")             # file names a class by its key
-DAN = Sailor("   05", "DF65", "Dan", "Moor", "Other club")
+ANN65 = Sailor("   12", "DF65", "Ann", "Smith")
+ANN95 = Sailor("   12", "DF95", "Ann", "Smith")             # Ann's other boat, also 12
+GALE = Sailor("   29", "DF95", "Paul", "Gale", "PAG")
+GRUNDY = Sailor("   29", "VICTORIA", "Paul", "Grundy", "PGU")
+BOB = Sailor("   07", "DF65", "Bob", "Jones")
+CAT = Sailor("   12", "victoria", "Cat", "Brown")             # file names a class by its key
+DAN = Sailor("   05", "DF65", "Dan", "Moor")
 MEMBERS = MemberList([ANN65, ANN95, GALE, GRUNDY, BOB, CAT, DAN])
 
 
-def resolver(*classes: BoatClass, clubs=None) -> SailResolver:
-    return SailResolver(MEMBERS, list(classes or (DF65, DF95, VIC)), clubs)
+def resolver(*classes: BoatClass) -> SailResolver:
+    return SailResolver(MEMBERS, list(classes or (DF65, DF95, VIC)))
 
 
 class ParseTests(unittest.TestCase):
@@ -55,9 +55,9 @@ class CandidateTests(unittest.TestCase):
         self.assertEqual(r.sailor("29/pgu"), GRUNDY)
         self.assertEqual(r.candidates("29/XX"), [])
 
-    def test_clubs(self):
-        self.assertEqual(resolver(clubs=["RMBC"]).candidates("5"), [])
+    def test_only_the_eligible_classes(self):
         self.assertEqual(resolver().sailor("5"), DAN)
+        self.assertEqual(resolver(DF95, VIC).candidates("5"), [])
 
 
 class ChoiceTests(unittest.TestCase):
@@ -97,9 +97,9 @@ class CheckRacesTests(unittest.TestCase):
         problems = resolver().check_races([Race("A", ["12#", "7", "12@"])])
         self.assertEqual(problems, [(2, 0, "Ann Smith is already sailing 12# in row 1 of this race.")])
 
-    def test_unrecognised_names_the_classes_and_clubs(self):
-        problems = resolver(DF65, clubs=["RMBC"]).check_races([Race("A", ["5"])])
-        self.assertIn("no DF65 sailor from RMBC has it", problems[0][2])
+    def test_unrecognised_names_the_classes(self):
+        problems = resolver(DF65, DF95).check_races([Race("A", ["99"])])
+        self.assertIn("no DF65 or DF95 sailor has it", problems[0][2])
 
     def test_no_members_no_checks(self):
         self.assertEqual(SailResolver(None, [DF65]).check_races([Race("A", ["99"])]), [])

@@ -5,10 +5,9 @@ from app.model.member_list import MemberList
 from app.model.sail_number import format_sail_number, sail_key, sort_key
 from app.model.sailor import Sailor
 
-ANN = Sailor("   12", "DF95", "Ann", "Smith", "RMBC")
-BOB = Sailor("   07", "DF95", "Bob", "Jones", "RMBC")
-CAT = Sailor("   12", "VICTORIA", "Cat", "Brown", "RMBC")
-DAN = Sailor("   05", "DF95", "Dan", "Moor", "Other club")
+ANN = Sailor("   12", "DF95", "Ann", "Smith")
+BOB = Sailor("   07", "DF95", "Bob", "Jones")
+CAT = Sailor("   12", "VICTORIA", "Cat", "Brown")
 
 
 class PersonTests(unittest.TestCase):
@@ -60,14 +59,6 @@ class MemberListTests(unittest.TestCase):
         self.assertEqual(self.members.find("7", "DF95"), BOB)
         self.assertEqual(self.members.find("007", "DF95"), BOB)
         self.assertIsNone(self.members.find("7", "VICTORIA"))
-
-    def test_find_from_clubs(self):
-        members = MemberList([ANN, DAN])
-        self.assertEqual(members.find("5", "DF95"), DAN)
-        self.assertEqual(members.find("5", "DF95", []), DAN)              # no clubs: any club
-        self.assertIsNone(members.find("5", "DF95", ["RMBC"]))
-        self.assertEqual(members.find("5", "DF95", ["RMBC", "other CLUB"]), DAN)
-        self.assertEqual(members.find("12", "DF95", ["rmbc"]), ANN)
 
     def test_boat_classes(self):
         self.assertEqual(self.members.boat_classes(), ["DF95", "VICTORIA"])

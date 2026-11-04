@@ -1,4 +1,4 @@
-"""sailor.py - one club sailor's boat: sail number, boat class, name and club.
+"""sailor.py - one club sailor's boat: sail number, boat class and name.
 
 A sailor may have several boats (several sail numbers), in one class or several. They can only
 sail one at a time, so in results their boats are alternatives: the same competitor
@@ -17,7 +17,6 @@ from dataclasses import dataclass
 from .boat_class import class_key
 from .sail_number import sail_key
 
-DEFAULT_CLUB = "RMBC"
 MAX_TAG = 4
 
 
@@ -32,7 +31,6 @@ class Sailor:
     boat_class: str
     forename: str
     surname: str
-    club: str = DEFAULT_CLUB
     tag: str = ""           # blank: the initials
 
     def __post_init__(self):

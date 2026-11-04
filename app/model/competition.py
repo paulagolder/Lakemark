@@ -2,9 +2,8 @@
 
     name        shown as the title, and gives the file name ("DF65 2026" -> DF65_2026.cxml)
     year
-    classes     the ids (keys in yachtclasses.xml) of the boat classes that race, such as
-                ["df65", "victoria"]; every race day is open to all of them
-    clubs       only sailors from these clubs may race (none listed: any club)
+    classes     the ids (keys in the club's classes file) of the boat classes that race,
+                such as ["df65", "victoria"]; every race day is open to all of them
     race_count  each boat's best race_count races count towards its points (None: all of them)
     directory   the sub folder of the output folder that Export HTML writes into
 """
@@ -35,7 +34,6 @@ class Competition:
     name: str
     year: int
     classes: list[str]
-    clubs: list[str] = field(default_factory=list)
     race_count: int | None = None
     directory: str = ""
     race_days: list[RaceDay] = field(default_factory=list)
@@ -50,7 +48,6 @@ class Competition:
         self.classes = _unique([str(c).strip() for c in self.classes])
         if not self.classes:
             raise ValueError("A competition needs at least one boat class, for example DF95.")
-        self.clubs = _unique([str(c).strip() for c in self.clubs])
         if self.race_count is not None and (isinstance(self.race_count, bool)
                                             or not isinstance(self.race_count, int)
                                             or self.race_count < 1):
@@ -99,15 +96,14 @@ class Competition:
         return self.race_days.pop(index)
 
     def with_details(self, details: Competition) -> Competition:
-        """A copy with the name, year, classes, clubs, race count and directory of details,
-        and this competition's race days."""
-        return Competition(details.name, details.year, details.classes, details.clubs,
-                           details.race_count, details.directory, self.race_days)
+        """A copy with the name, year, classes, race count and directory of details, and this
+        competition's race days."""
+        return Competition(details.name, details.year, details.classes, details.race_count,
+                           details.directory, self.race_days)
 
     def same_details(self, other: Competition) -> bool:
-        return ((self.name, self.year, self.classes, self.clubs, self.race_count, self.directory)
-                == (other.name, other.year, other.classes, other.clubs, other.race_count,
-                    other.directory))
+        return ((self.name, self.year, self.classes, self.race_count, self.directory)
+                == (other.name, other.year, other.classes, other.race_count, other.directory))
 
 
 def _unique(names: list[str]) -> list[str]:

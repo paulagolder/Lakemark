@@ -5,7 +5,7 @@ from pathlib import Path
 
 from app.storage.competition_store import load_competition
 from app.storage.errors import StorageError
-from app.storage.member_store import MEMBERS_FILE, load_members
+from app.storage.member_store import load_members
 from app.storage.settings_store import PROPERTIES_FILE, load_settings
 from app.storage.xml_file import parse_xml
 
@@ -41,9 +41,9 @@ class ParseXmlTests(unittest.TestCase):
             parse_xml(self.write("a.xml", BOMB.encode("utf-16")))
 
     def test_every_reader_refuses_a_bomb(self):
-        self.write(MEMBERS_FILE, BOMB.encode())
+        self.write("RMBCSail.xml", BOMB.encode())
         with self.assertRaises(StorageError):
-            load_members(self.dir)
+            load_members(self.dir / "RMBCSail.xml")
         with self.assertRaises(StorageError):
             load_competition(self.write("x.cxml", BOMB.replace("sails", "competition").encode()))
         self.write(PROPERTIES_FILE, BOMB.replace("sails", "properties").encode())

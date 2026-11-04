@@ -1,6 +1,7 @@
 """boat_class.py - boat classes, such as DF95 or Victoria.
 
-The club's classes are kept in yachtclasses.xml (see storage/boat_class_store.py). Each has:
+A club's classes are kept in its classes file (RMBCClasses.xml, say; see
+storage/boat_class_store.py). Each has:
 
     key       a short id, such as "df95"
     fullname  the name shown on screen and used in the sailors and competition files: "DF95"

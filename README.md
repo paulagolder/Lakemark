@@ -2,35 +2,94 @@
 
 Race results for RC yachts: enter and edit race results for radio-controlled model sailing yachts.
 
-- A **competition** has a name, a year, one or more boat classes and the clubs whose sailors may race,
-  and lives in one XML file. It holds up to **15 race days**.
+- The program keeps results for one or more **clubs**, such as RMBC and CwMBC (Chasewater), one
+  at a time. Each club has its own folder of sailors, boat classes, competitions, title and logo,
+  so one race manager can look after several clubs, and another club can start using it.
+- A **competition** has a name, a year and one or more boat classes, and lives in one XML file in
+  its club's folder. It holds up to **15 race days**.
 - A **race day** has a date (typed as day/month/year, today's for a new one) and a name, which by
   default is made from the date ("Race Day 30-12-1978") and follows it until you change it. It is a
   small table: up to **6 races (columns, Race A, Race B ...) and 15 rows**.
 - A competition's classes are typed as a list separated by commas ("DF65, Victoria"); each must be
-  one of the classes in `yachtclasses.xml`, typed by its key or full name in any case. They are
+  one of the club's classes (`RMBCClasses.xml`, say), typed by its key or full name in any case. They are
   stored as class ids without repeats (`classes="df65,victoria"`).
 - Every race day is open to all the competition's classes, and shows them but cannot change them.
-  Each cell is a **sail number**, which must belong to a sailor in one of those classes from one
-  of the competition's clubs (see **Entering sail numbers** below).
+  Each cell is a **sail number**, which must belong to one of the club's sailors in one of those
+  classes (see **Entering sail numbers** below).
 
 ## The data folder
 
 Everything lives in `~/.lakemark` (created on first run). Before version 1.04 the program was called
 pyraceresults and used `~/.pyraceresults`; the first run of 1.04 moves that folder to `~/.lakemark`.
 
-- `properties.xml`: the window title, the default number of rows and columns for a new race day, and
-  `output_folder`, where **Export HTML** writes (default `~/Documents/lakemark_output`).
-- `RMBCSail.xml`: the club sailors, one `<sail sailnumber="   01" boatclass="DF95" forename=".." surname=".." club="RMBC" tag="PG" />` per boat (tag: see below). Edit it with the
+    ~/.lakemark/
+        properties.xml          settings for every club
+        RMBC/                   one folder for each club, named by its abbreviation
+            RMBCClub.xml        the club's title
+            RMBCSail.xml        the club's sailors
+            RMBCClasses.xml     the club's boat classes
+            RMBCLogo.png        the club's logo (or .gif)
+            DF95_2026.cxml      the club's competitions
+            ...
+        CwMBC/
+            CwMBCClub.xml ...
+
+- `properties.xml`: `default_club`, the club the program opens with; the default number of rows
+  and columns for a new race day; and `output_folder`, where **Export HTML** writes (default
+  `~/Documents/lakemark_output`), in a sub folder for each club.
+- `<club>Club.xml`: the club's title, shown at the top of the windows and on web pages. Change it,
+  and the logo, with **Club > club details**.
+- `<club>Sail.xml`: the club sailors, one `<sail sailnumber="   01" boatclass="DF95" forename=".." surname=".." tag="PG" />` per boat (tag: see below). Edit it with the
   **File > Club sailors...** menu in the competitions window, then click Save. "Show class" limits the list to one class.
+- `<club>Classes.xml`: the boat classes, one `<boatclass key="df95" fullname="DF95" cypher="95" symbol="@" />`
+  per class (a new club starts with DF65, RG65, DF95 and Victoria). Edit it with the
+  **File > Boat classes...** menu, then click Save.
+- `<club>Logo.png` (or `.gif`): the club's logo. Choose it with **Club > club details >
+  Choose picture...**, which copies it here. Tk can only show PNG and GIF pictures: save a JPG
+  logo as PNG first.
 - Competition files, named after the competition, like `Victoria_df65_competition_2026.cxml`.
   New competitions are saved here, and every `.cxml` file here is listed in the first window.
-- `yachtclasses.xml`: the boat classes, one `<boatclass key="df95" fullname="DF95" cypher="95" symbol="@" />`
-  per class. Edit it with the **File > Boat classes...** menu, then click Save.
 
-The first window lists every competition in the data folder. Double-click one (or select it and click
+Before version 1.05 the data folder held RMBC's files directly (`RMBCSail.xml`,
+`yachtclasses.xml`, the competitions, and the title in `properties.xml`). The first run of 1.05
+moves them into an `RMBC` folder, with RMBC's logo, and makes RMBC the default club. A sailor's
+`club="..."` and a competition's `clubs="..."` in those files are ignored: a club's sailors and
+competitions are the ones in its folder.
+
+## Clubs
+
+The program opens with the default club, or the one given with `--club`:
+
+    lakemark --club CwMBC
+
+so a launcher (a desktop shortcut) for each club opens that club straight away. If the club named
+is not there yet, the program offers to set it up. The very first time it runs, with no clubs at
+all, it asks for one.
+
+The **Club** menu in the competitions window lists the clubs and switches to another (closing
+this club's windows; everything is already saved), makes a **New club**, changes the club's
+**details** (title and logo), and sets which club the program **opens with**. A club's
+abbreviation names its folder and files, so it cannot be changed; it is 1 to 10 letters or
+digits.
+
+### Handing a club over
+
+To pass a club on to another race manager, choose **Club > Export club...**. It saves the
+club's folder as one zip file (`CwMBC_club_2026-11-04.zip`): its title, logo, sailors, classes
+and competitions, with their backups. Your own settings (`properties.xml`), your other clubs
+and the exported web pages stay behind.
+
+The other race manager (with version 1.05 or later) chooses **Club > Import club...** and picks
+the file; the club appears in their Club menu. Import only accepts a zip with one club folder in
+it, and never overwrites a club they already have with the same abbreviation. Copying the
+club's folder into their data folder by hand does the same.
+
+Once the club is handed over, only one person should go on entering its results, or the two
+copies will differ.
+
+The first window lists every competition in the club's folder. Double-click one (or select it and click
 **Open**) to open it in its own window. **Edit...** changes its name,
-year, classes, clubs, races counted or HTML folder (the file is renamed to match the name); **New...**
+year, classes, races counted or HTML folder (the file is renamed to match the name); **New...**
 starts a new competition;
 **Delete** takes it off the list (the file is kept as `.cxml.deleted`, rename it back to restore it). In a competition's window, pick a
 race day and click **Edit** (or double-click it). Saving the race day window writes the competition file
@@ -41,8 +100,9 @@ straight away.
 Needs Python 3.9 or newer with tkinter (included with the Windows and macOS installers from python.org;
 on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
-    python main.py                   # lists the competitions in ~/.lakemark
-    python main.py --version         # Lakemark 1.04 (4 November 2026)
+    python main.py                   # opens the default club, in ~/.lakemark
+    python main.py --club CwMBC      # opens another club
+    python main.py --version         # Lakemark 1.05 (4 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -54,7 +114,7 @@ eligible sailor's. As each number is typed the window says whose it is:
 - **One match**: that sailor.
 - **More than one**: when the cursor leaves the cell (Enter, Tab ...), a list asks which, and the
   number is tagged with your choice: `62*` (a **class tag**, the class's symbol from
-  `yachtclasses.xml`) when the choices are one sailor in different classes, or `29/PAG` (a
+  the club's classes file) when the choices are one sailor in different classes, or `29/PAG` (a
   **sailor tag**) when they are different sailors. Save also asks for any still to choose.
 
 Each sailor's tag is their initials unless changed in **Club sailors** (Tag). If two sailors with
@@ -87,14 +147,15 @@ each race day's figures and the leading boats in the current results.
 ## Web pages of the results
 
 In the race day window, **Export HTML** writes the table as a web page, with each sailor's name under
-their sail number. It goes in `output_folder` (see properties.xml), in the competition's HTML folder
-(`directory`), for example `~/Documents/lakemark_output/Victoria2026/Race_day_1.html`. Exporting
+their sail number. It goes in `output_folder` (see properties.xml), in the club's folder and the
+competition's HTML folder (`directory`), for example
+`~/Documents/lakemark_output/RMBC/Victoria2026/Race_day_1.html`. Exporting
 the same race day again replaces its page.
 
 In a results window, **Export HTML** writes that table as `results_current.html` or
 `results_final.html` in the same folder.
 
-Each page is a single file (logo included), ready to email, upload or print.
+Each page is a single file (the club's title and logo included), ready to email, upload or print.
 
 ## Security check
 
@@ -127,16 +188,16 @@ To make a stick, plug it in and run
 
     ./make_stick.sh /media/$USER/STICK         # data from ~/.lakemark (or name another)
 
-It builds the program if needed and copies the club's files into `system/` (with
-`output_folder` set to `output`). On a stick that already has data it only updates the
+It builds the program if needed and copies the club folders and `properties.xml` into
+`system/` (with `output_folder` set to `output`). On a stick that already has data it only updates the
 program, leaving the data alone. It ends by saying whether the program runs straight from the
 stick: Linux only runs `.exe`, `.bat` and `.com` files from FAT32 sticks, so on those use
 `start-linux.sh` (below), or format the stick exFAT.
 
 The program uses a `system` folder beside it as its data folder, and there the default
 `output_folder` is `output` (a relative output folder is beside the data folder). Copy the whole
-folder to the stick and put the club's files (`RMBCSail.xml`, `properties.xml`,
-`yachtclasses.xml`, competitions) in `system/`. If a stick will not let the program run,
+folder to the stick and put `properties.xml` and the club folders (`RMBC/`, `CwMBC/` ...) in
+`system/`. `lakemark --club CwMBC` works from the stick too. If a stick will not let the program run,
 `bash system/start-linux.sh` runs a temporary copy of it with the stick's data. `--data FOLDER`
 picks any data folder by hand.
 
@@ -151,8 +212,8 @@ The .exe is not code-signed, so Windows may warn "Windows protected your PC": cl
 **Both at once, on GitHub**: push a version tag and GitHub builds both (on Ubuntu 22.04 and
 Windows), runs the tests on each, and publishes them as a release to download:
 
-    git tag -a v1.04 -m "Lakemark 1.04"
-    git push origin v1.04
+    git tag -a v1.05 -m "Lakemark 1.05"
+    git push origin v1.05
 
 See `.github/workflows/release.yml`. It can also be run by hand from the Actions tab to check
 the builds without publishing anything.
@@ -171,7 +232,8 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             sail_number.py      matching, sorting and writing sail numbers ("1" = "01")
             race.py             Race: its name and finishers in order (place = points)
             race_day.py         RaceDay: a name, a date and its races, also seen as a table
-            competition.py      Competition: name, year, classes, clubs, races counted, race days
+            club.py             Club: a club's abbreviation, title, folder and the names of its files
+            competition.py      Competition: name, year, classes, races counted, race days
             sailor.py           Sailor: one club boat
             member_list.py      MemberList: the club sailors
             sail_entry.py       SailResolver: which sailor an entry ("12", "12@", "29/PAG") means; checks race days
@@ -181,7 +243,10 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             errors.py           StorageError, with a message that can be shown to the user
             xml_file.py         writes a file safely, keeping a .bak
             competition_store.py  competition (.cxml) files
-            member_store.py     the club sailors, RMBCSail.xml
+            club_store.py       the club folders: finding, making, title and logo; moving pre-1.05 files
+            club_transfer.py    a club as a zip file: Export club and Import club
+            member_store.py     a club's sailors, RMBCSail.xml
+            boat_class_store.py a club's boat classes, RMBCClasses.xml
             settings_store.py   Settings: the data folder and properties.xml
         services/               working with the model (no screen)
             session.py          an open file: every change is saved at once, and undone if saving fails
@@ -190,7 +255,9 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             html_export.py      a race day, or the results, as a web page
             report.py           the text summary of a competition (Report)
         ui/                     the windows
-            front_window.py     the first window: the list of competitions
+            start.py            which club to open (--club, the default, or a new one), then its window
+            front_window.py     the first window: a club's competitions, and the Club menu
+            club_dialog.py      New club, and a club's details (title and logo)
             competition_dialog.py  asks for a competition's details (New and Edit)
             competition_window.py  one competition: its race days and a preview
             race_day_window.py  enter or edit one race day's table
@@ -199,8 +266,10 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             report_window.py    the text summary (Report in a competition's window)
             browser.py          opens an exported page in the web browser
             sailors_window.py   the Club sailors window
+            boat_classes_window.py  the Boat classes window
             sail_chooser.py     asks which sailor an ambiguous sail number means
-        resources/              club_logo.svg (the original) and club_logo.png (made from it by build_linux.sh)
+        resources/              RMBC's logo: club_logo.svg (the original) and club_logo.png (made from it by
+                                build_linux.sh), given to the RMBC folder made from a pre-1.05 data folder
     tests/                      the same layout as app/: python -m unittest discover -s tests -t .
 
 The layers only call downwards: ui uses services, storage and model; services use storage and
@@ -209,7 +278,7 @@ needing a screen. To change a limit (races, rows, race days), edit `app/model/li
 
 ## The file
 
-    <competition year="2026" name="Victoria_df65_competition_2026" racecount="24" clubs="RMBC"
+    <competition year="2026" name="Victoria_df65_competition_2026" racecount="24"
                  directory="Victoria2026" classes="df65,victoria" version="3">
       <raceday name="Race day 1" date="2026-10-10">
         <race name="Race A">
@@ -222,9 +291,8 @@ needing a screen. To change a limit (races, rows, race days), edit `app/model/li
 
 A competition holds race days, a race day holds races, and a race holds sail numbers in
 finishing order (the first `<sail>` came 1st). An empty `<sail />` is a place left empty.
-`classes` and `clubs` are lists separated by commas; `racecount` and `clubs` may be left out
-(every race counts; any club). `classes` are the class ids from `yachtclasses.xml`, and every
-race day is open to all of them. A race day's `date` is year-month-day and may be left out.
+`classes` is a list separated by commas of the class ids from the club's classes file, and
+every race day is open to all of them. `racecount` may be left out (every race counts). A race day's `date` is year-month-day and may be left out.
 
 Older files still open and are saved in this layout the next time they change. Versions 1 and 2
 have a single `class="DF95"` and no name (the name becomes "DF95 2026"); version 1 stores each race

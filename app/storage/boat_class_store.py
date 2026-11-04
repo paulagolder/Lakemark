@@ -1,6 +1,7 @@
-"""boat_class_store.py - read and write the club's boat classes, yachtclasses.xml.
+"""boat_class_store.py - read and write a club's boat classes, <club>Classes.xml.
 
-The file lives in the data folder (~/.lakemark), one <boatclass> per class:
+The file is in the club's folder (RMBCClasses.xml, say; see model/club.py), one <boatclass>
+per class:
 
     <classes>
       <boatclass key="df65" fullname="DF65" cypher="65" symbol="#" />
@@ -22,12 +23,10 @@ from ..model.boat_class import DEFAULT_BOAT_CLASSES, BoatClass, BoatClassList
 from .errors import StorageError
 from .xml_file import parse_xml, write_xml
 
-BOAT_CLASSES_FILE = "yachtclasses.xml"
 
-
-def boat_classes_from_xml(root: ET.Element) -> BoatClassList:
+def boat_classes_from_xml(root: ET.Element, name: str = "The classes file") -> BoatClassList:
     if root.tag != "classes":
-        raise StorageError(f"{BOAT_CLASSES_FILE} should contain a <classes> element.")
+        raise StorageError(f"{name} should contain a <classes> element.")
     classes = BoatClassList()
     for number, el in enumerate(root.findall("boatclass"), start=1):
         boat_class = BoatClass(el.get("key", "").strip(), el.get("fullname", "").strip(),
@@ -35,7 +34,7 @@ def boat_classes_from_xml(root: ET.Element) -> BoatClassList:
         try:
             classes.add(boat_class)
         except ValueError as exc:
-            raise StorageError(f"{BOAT_CLASSES_FILE}, class {number}: {exc}") from exc
+            raise StorageError(f"{name}, class {number}: {exc}") from exc
     return classes
 
 
@@ -47,36 +46,36 @@ def boat_classes_to_xml(classes: BoatClassList) -> ET.Element:
     return root
 
 
-def save_boat_classes(classes: BoatClassList, data_dir) -> None:
-    """Write data_dir/yachtclasses.xml, keeping the previous version as yachtclasses.xml.bak.
+def save_boat_classes(classes: BoatClassList, path) -> None:
+    """Write the classes to path, keeping the previous version as <name>.bak.
 
     Raises StorageError.
     """
-    write_xml(boat_classes_to_xml(classes), Path(data_dir) / BOAT_CLASSES_FILE, make_folder=True)
+    write_xml(boat_classes_to_xml(classes), Path(path), make_folder=True)
 
 
-def load_boat_classes(data_dir) -> BoatClassList:
-    """Read data_dir/yachtclasses.xml, creating it with the default classes if it is missing.
+def load_boat_classes(path) -> BoatClassList:
+    """Read the classes from path, creating it with the default classes if it is missing.
 
     Raises StorageError.
     """
-    path = Path(data_dir) / BOAT_CLASSES_FILE
+    path = Path(path)
     if not path.exists():
-        save_boat_classes(BoatClassList(DEFAULT_BOAT_CLASSES), data_dir)
+        save_boat_classes(BoatClassList(DEFAULT_BOAT_CLASSES), path)
     try:
         root = parse_xml(path)
     except ET.ParseError as exc:
         raise StorageError(f"{path} is not valid XML: {exc}") from exc
     except OSError as exc:
         raise StorageError(f"Could not read {path}: {exc.strerror or exc}") from exc
-    return boat_classes_from_xml(root)
+    return boat_classes_from_xml(root, path.name)
 
 
-def boat_classes_or_defaults(data_dir) -> BoatClassList:
-    """The classes in yachtclasses.xml. Never raises: if it cannot be read (or is empty), the
+def boat_classes_or_defaults(path) -> BoatClassList:
+    """The classes in the file. Never raises: if it cannot be read (or is empty), the
     default classes."""
     try:
-        classes = load_boat_classes(data_dir)
+        classes = load_boat_classes(path)
     except StorageError:
         classes = BoatClassList()
     return classes if len(classes) else BoatClassList(DEFAULT_BOAT_CLASSES)

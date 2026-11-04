@@ -8,14 +8,15 @@
 #
 #     lakemark             the program
 #     output/              exported web pages
-#     system/              settings, club sailors, boat classes, competitions
+#     system/              settings, and a folder for each club (sailors, classes, competitions)
 #
 # Builds the program first (./build_linux.sh) if it is missing or older than the code.
 #
 # A new stick gets a copy of the data folder's properties.xml (exporting to output/ on the
-# stick), RMBCSail.xml, yachtclasses.xml and competitions (*.cxml). A stick that already has
-# a system folder only gets the new program, README and launcher: the data on it is left
-# alone, as it may be newer than this computer's.
+# stick) and its club folders (each one holding its <club>Club.xml). A stick that already has
+# data in its system folder only gets the new program, README and launcher: the data on it is
+# left alone, as it may be newer than this computer's. Start the program with the data folder
+# from before version 1.05 once (it moves the files into a club folder) before making a stick.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -44,24 +45,36 @@ mkdir -p "$target/output" "$target/system"
 cp "$portable/lakemark" "$target/"
 cp "$portable/system/README.txt" "$portable/system/start-linux.sh" "$target/system/"
 
-if [ -n "$(find "$target/system" -maxdepth 1 \( -name '*.cxml' -o -name 'RMBCSail.xml' \) -print -quit)" ]; then
+# A club folder is one holding its <abbreviation>Club.xml: RMBC/RMBCClub.xml.
+clubs_in() {
+    for folder in "$1"/*/; do
+        folder="${folder%/}"
+        [ -f "$folder/$(basename "$folder")Club.xml" ] && basename "$folder"
+    done
+    return 0
+}
+
+if [ -n "$(clubs_in "$target/system")" ] ||
+   [ -n "$(find "$target/system" -maxdepth 1 \( -name '*.cxml' -o -name 'RMBCSail.xml' \) -print -quit)" ]; then
     echo "The stick already has data in system/: left as it is (program updated only)."
 else
+    if [ -z "$(clubs_in "$data")" ] && [ -f "$data/RMBCSail.xml" ]; then
+        echo "$data still has its files from before version 1.05. Start the program once" >&2
+        echo "(it moves them into a club folder), then run this again." >&2
+        exit 1
+    fi
     echo "Copying the data from $data ..."
-    copied=0
-    for name in RMBCSail.xml yachtclasses.xml; do
-        if [ -f "$data/$name" ]; then cp "$data/$name" "$target/system/"; copied=$((copied + 1)); fi
-    done
-    for file in "$data"/*.cxml; do
-        if [ -f "$file" ]; then cp "$file" "$target/system/"; copied=$((copied + 1)); fi
+    copied=""
+    for club in $(clubs_in "$data"); do
+        cp -r "$data/$club" "$target/system/"
+        copied="$copied $club"
     done
     if [ -f "$data/properties.xml" ]; then
         # Export onto the stick, not into a folder on whichever computer is running it.
         sed 's|<output_folder>.*</output_folder>|<output_folder>output</output_folder>|' \
             "$data/properties.xml" > "$target/system/properties.xml"
-        copied=$((copied + 1))
     fi
-    echo "Copied $copied files."
+    echo "Copied the settings and the clubs:${copied:- none}."
 fi
 
 echo "Writing everything to the stick..."

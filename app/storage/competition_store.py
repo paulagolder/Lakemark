@@ -3,7 +3,7 @@
 File layout: a competition holds race days, a race day holds races, and a race holds the
 sail numbers of its finishers in finishing order (the first <sail> came 1st):
 
-    <competition year="2026" name="Victoria_df65_competition_2026" racecount="24" clubs="RMBC"
+    <competition year="2026" name="Victoria_df65_competition_2026" racecount="24"
                  directory="Victoria2026" classes="df65,victoria" version="3">
       <raceday name="Race day 1" date="2026-10-10">
         <race name="Race A">
@@ -16,10 +16,11 @@ sail numbers of its finishers in finishing order (the first <sail> came 1st):
       ...
     </competition>
 
-classes and clubs are lists separated by commas; classes are the class ids (keys) from
-yachtclasses.xml. racecount (the best races that count for each boat) and clubs may be left
-out, and directory defaults to one made from the name. Every race day is open to all the
-competition's classes.
+classes is a list separated by commas of the class ids (keys) from the club's classes file.
+racecount (the best races that count for each boat) may be left out, and directory defaults
+to one made from the name. Every race day is open to all the competition's classes. A
+clubs="..." from before version 1.05 (when a competition could limit which clubs' sailors
+raced) is ignored: a competition is in its club's folder, and its sailors are that club's.
 
 A race day's date is year-month-day, and may be left out (not known).
 
@@ -63,8 +64,6 @@ def competition_to_xml(comp: Competition) -> ET.Element:
     attributes = {"year": str(comp.year), "name": comp.name}
     if comp.race_count is not None:
         attributes["racecount"] = str(comp.race_count)
-    if comp.clubs:
-        attributes["clubs"] = ",".join(comp.clubs)
     attributes.update({"directory": comp.directory, "classes": ",".join(comp.classes),
                        "version": FORMAT_VERSION})
     root = ET.Element("competition", {key: _clean(value) for key, value in attributes.items()})
@@ -125,8 +124,7 @@ def _competition_details(root: ET.Element) -> Competition:
         raise StorageError(f"The race count '{count_text}' is not a whole number.") from None
 
     try:
-        return Competition(name, year, classes, split_list(root.get("clubs", "")), race_count,
-                           root.get("directory", ""))
+        return Competition(name, year, classes, race_count, root.get("directory", ""))
     except ValueError as exc:
         raise StorageError(str(exc)) from exc
 
@@ -200,8 +198,8 @@ def list_competitions(folder) -> list[tuple[Path, Competition | None, str]]:
 
 
 def update_competition_details(path, details: Competition) -> Path:
-    """Change a competition's name, year, classes, clubs, race count and directory (keeping its
-    race days), and rename its file to match the name.
+    """Change a competition's name, year, classes, race count and directory (keeping its race
+    days), and rename its file to match the name.
 
     Returns the new path. Refuses (StorageError) if another competition already has that
     file name. The backup (.bak) moves with the file.
