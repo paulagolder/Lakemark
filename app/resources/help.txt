@@ -1,0 +1,104 @@
+# Lakemark help
+
+Lakemark keeps race results for radio-controlled model yachts. It looks after one or more clubs, one at a time. Each club has its own sailors, boat classes, competitions, title and logo.
+
+# Getting started
+
+Download the program file for your computer from the Releases page: the one ending -linux for Linux, or -windows.exe for Windows. It is a single file with nothing else to install. Copy it anywhere and run it.
+
+Windows may warn "Windows protected your PC", because the program is not code-signed: click More info, then Run anyway.
+
+The first time it runs, with no clubs at all, it asks for one: an abbreviation (such as RMBC, 1 to 10 letters or digits) and a title.
+
+A new version never touches your data: your clubs, sailors and competitions stay in the .lakemark folder in your home folder (see Where things are kept).
+
+# Competitions
+
+The first window lists the club's competitions.
+
+- Open (or double-click) opens a competition in its own window.
+- New... starts a competition: a name, a year and one or more boat classes, typed as a list separated by commas ("DF65, Victoria"). Each must be one of the club's boat classes.
+- Edit... changes its name, year, classes, races counted or HTML folder.
+- Delete takes it off the list. The file is kept as .cxml.deleted, so it can be brought back by renaming it.
+
+A competition holds up to 15 race days.
+
+# Race days
+
+In a competition's window, pick a race day and click Edit (or double-click it). A race day has a date (day/month/year) and a name, which follows the date ("Race Day 30-12-1978") until you change it.
+
+A race day is a small table: up to 6 races (Race A, Race B ...) side by side, and up to 15 places down. Type each boat's sail number in finishing order: the first row came 1st.
+
+- Enter, Tab or Down moves down the column, adding a row at the bottom until there are 15, then moves to the top of the next column. Shift+Tab or Up goes back.
+- Add row and Add column grow the table.
+- Save writes the competition file straight away.
+
+# Entering sail numbers
+
+As each number is typed the window says whose it is:
+
+- No match: "Unrecognised sail", and the cell is marked.
+- One match: that sailor.
+- More than one: when you leave the cell, a list asks which. The number is tagged with your choice: 62* (a class tag) when it is one sailor in different classes, or 29/PAG (a sailor tag) when it is different sailors. Save also asks for any still to choose.
+
+A sailor's tag is their initials unless changed in Club sailors. If two sailors with the same sail number have the same initials, give one of them another tag, such as PAG and PGU.
+
+The race day window marks a sailor who appears twice in one race.
+
+# Club sailors and boat classes
+
+File > Club sailors... lists the club's sailors, one row per boat: sail number, class, name and tag. "Show class" limits the list to one class. Click Save when done.
+
+File > Boat classes... lists the club's classes. A new club starts with DF65, RG65, DF95 and Victoria. Click Save when done.
+
+# Results
+
+In a competition's window, Results offers two tables, one row per sailor (with every sail number they sailed). A finish earns its place in points (1st = 1 point, 2nd = 2 points ...), so fewer is better, and equal scores share a place.
+
+- Current results: every sailor, ranked by their average points per race sailed. Useful during the season, when not everyone can make every race day.
+- Final results: only the sailors who have sailed the competition's races counted or more, ranked by the points from their best that many races. Set races counted with Edit... in the competitions list.
+
+Click a column heading to sort by it; click it again to reverse.
+
+Report gives a short text summary of the competition: race days, races, finishes, sailors taking part and the leaders. Save... writes it to a text file and Copy puts it on the clipboard.
+
+# Web pages
+
+Export HTML (in a race day window or a results window) writes the table as a web page, with the club's title and logo, ready to email, upload or print. Pages go in the output folder (normally Documents/lakemark_output), in a folder for the club and the competition. Exporting again replaces the page.
+
+# Clubs
+
+The Club menu:
+
+- lists the clubs, and switches to another (this club's windows close; everything is already saved);
+- New club... makes another club;
+- club details changes the club's title and logo. Choose a PNG or GIF picture: save a JPG logo as PNG first;
+- Open with ... when the program starts sets the club the program opens with.
+
+To open a particular club straight away, start the program with its abbreviation, for example from a desktop shortcut:
+
+    lakemark --club CwMBC
+
+# Handing a club over
+
+To pass a club on to another race manager, choose Club > Export club.... It saves the club as one zip file: its title, logo, sailors, classes and competitions.
+
+The other race manager chooses Club > Import club... and picks the file; the club appears in their Club menu. Import never overwrites a club they already have.
+
+Once the club is handed over, only one person should go on entering its results, or the two copies will differ.
+
+# On a USB stick
+
+A portable copy is a Lakemark folder holding the program, an output folder (the web pages you export: the only folder you need to open) and a system folder (the program's own files: leave it alone). Keep the three together, and close the program before unplugging the stick.
+
+If the program will not start from the stick on Linux, open a terminal and run
+
+    bash /path/to/Lakemark/system/start-linux.sh
+
+In the Files app, if double-clicking opens the program as a document, right-click it and choose "Run as a Program".
+
+# Where things are kept
+
+Info > About shows this club's folder, the data folder and the output folder.
+
+Everything lives in the data folder, .lakemark in your home folder (or the system folder of a portable copy): the settings, and one folder for each club with its sailors, boat classes, logo and competitions. Each save keeps the previous version of a file beside it as .bak.

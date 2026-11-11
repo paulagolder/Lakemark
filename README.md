@@ -95,6 +95,13 @@ starts a new competition;
 race day and click **Edit** (or double-click it). Saving the race day window writes the competition file
 straight away.
 
+## Help and About
+
+The **Info** menu in the competitions window has **Help** (F1), a guide for race managers
+(`app/resources/help.txt`), and **About Lakemark**: the version and its date, the Python and
+system it runs on, the open club, and where its folder, the data folder and the output folder
+are. **Copy** puts those facts on the clipboard, to send with a question.
+
 ## Running it
 
 Needs Python 3.9 or newer with tkinter (included with the Windows and macOS installers from python.org;
@@ -102,7 +109,7 @@ on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
     python main.py                   # opens the default club, in ~/.lakemark
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # Lakemark 1.05 (4 November 2026)
+    python main.py --version         # Lakemark 1.06 (11 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -274,6 +281,7 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             results_table.py    the columns and scoring note shared by the results window and page
             html_export.py      a race day, or the results, as a web page
             report.py           the text summary of a competition (Report)
+            about.py            the version, the facts Info > About shows, and the help text
         ui/                     the windows
             start.py            which club to open (--club, the default, or a new one), then its window
             front_window.py     the first window: a club's competitions, and the Club menu
@@ -284,11 +292,12 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             grid_navigation.py  where Enter/Tab moves to in that table
             results_window.py   the current or final results (Results in a competition's window)
             report_window.py    the text summary (Report in a competition's window)
+            info_windows.py     the Info menu's Help and About windows
             browser.py          opens an exported page in the web browser
             sailors_window.py   the Club sailors window
             boat_classes_window.py  the Boat classes window
             sail_chooser.py     asks which sailor an ambiguous sail number means
-        resources/              RMBC's logo: club_logo.svg (the original) and club_logo.png (made from it by
+        resources/              help.txt, the text of Info > Help (keep it in step with this README), and RMBC's logo: club_logo.svg (the original) and club_logo.png (made from it by
                                 build_linux.sh), given to the RMBC folder made from a pre-1.05 data folder
     tests/                      the same layout as app/: python -m unittest discover -s tests -t .
 

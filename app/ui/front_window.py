@@ -14,6 +14,8 @@ The Club menu switches to another club (closing this club's windows), makes a ne
 changes this club's title and logo, and sets which club the program opens with. Export club
 saves the club as a zip file, to hand it over to another race manager; Import club adds a club
 from such a file.
+
+The Info menu shows the help (F1) and About: the version, and where this club's files are.
 """
 
 from __future__ import annotations
@@ -40,6 +42,7 @@ from .boat_classes_window import BoatClassesWindow
 from .club_dialog import ClubDetailsDialog, NewClubDialog, load_logo
 from .competition_window import CompetitionWindow
 from .competition_dialog import CompetitionDialog
+from .info_windows import AboutWindow, HelpWindow
 from .sailors_window import SailorsWindow
 
 COLUMNS = [("competition", "Competition", 220), ("classes", "Boat classes", 130), ("year", "Year", 60),
@@ -80,9 +83,14 @@ class FrontWindow(tk.Tk):
         menubar.add_cascade(label="File", menu=file_menu)
         self.club_menu = tk.Menu(menubar, tearoff=False, postcommand=self._fill_club_menu)
         menubar.add_cascade(label="Club", menu=self.club_menu)
+        info_menu = tk.Menu(menubar, tearoff=False)
+        info_menu.add_command(label="Help", accelerator="F1", command=self.show_help)
+        info_menu.add_command(label="About Lakemark", command=self.show_about)
+        menubar.add_cascade(label="Info", menu=info_menu)
         self.config(menu=menubar)
         self.bind("<Control-n>", lambda e: self.new_competition())
         self.bind("<F5>", lambda e: self.refresh())
+        self.bind("<F1>", lambda e: self.show_help())
         self.bind("<Control-q>", lambda e: self.destroy())
 
     def _build_widgets(self) -> None:
@@ -296,6 +304,18 @@ class FrontWindow(tk.Tk):
 
     def _boat_classes(self):
         return boat_classes_or_defaults(self.club.classes_file)
+
+    # -- the Info menu ----------------------------------------------------------------------
+
+    def show_help(self) -> None:
+        window = getattr(self, "_help", None)
+        if window is not None and window.winfo_exists():     # already open: bring it forward
+            window.lift()
+            return
+        self._help = HelpWindow(self)
+
+    def show_about(self) -> None:
+        AboutWindow(self, self.settings, self.club)
 
     # -- clubs ------------------------------------------------------------------------------
 

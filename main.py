@@ -16,20 +16,12 @@ show their text in a message box instead of printing it.
 from __future__ import annotations
 
 import argparse
-import datetime
 import sys
 from pathlib import Path
 
-from app import __version__, __version_date__
+from app.services.about import NAME, version_text
 
 PROGRAM = "lakemark"                     # the program file's name
-NAME = "Lakemark"
-
-
-def version_text() -> str:
-    """'Lakemark 1.04 (4 November 2026)'."""
-    date = datetime.date.fromisoformat(__version_date__)
-    return f"{NAME} {__version__} ({date.day} {date:%B %Y})"
 
 
 def _show(text: str) -> None:
