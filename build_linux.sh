@@ -24,6 +24,16 @@ if command -v convert >/dev/null && [ "$logo.svg" -nt "$logo.png" ]; then
     convert -background none -density 384 "$logo.svg" -trim +repage -resize x56 -depth 8 "$logo.png"
 fi
 
+# Lakemark's icon: the PNG (for the windows) and the .ico (the Windows program file's icon, used
+# by build_windows.bat) are made from lakemark.svg when ImageMagick is installed; otherwise the
+# ones already in the project are used.
+icon=app/resources/lakemark
+if command -v convert >/dev/null && [ "$icon.svg" -nt "$icon.png" ]; then
+    echo "Making the icon..."
+    convert -background none -density 384 "$icon.svg" -resize 256x256 -depth 8 "$icon.png"
+    convert -background none -density 384 "$icon.svg" -define icon:auto-resize=256,48,32,16 "$icon.ico"
+fi
+
 echo "Building..."
 pyinstaller --noconfirm --clean --onefile --windowed \
     --name lakemark \

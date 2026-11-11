@@ -38,6 +38,7 @@ from ..storage.club_store import list_clubs
 from ..storage.club_transfer import export_club, export_filename, import_club
 from ..storage.errors import StorageError
 from ..storage.settings_store import Settings, save_settings
+from .app_icon import APP_CLASS, set_app_icon
 from .boat_classes_window import BoatClassesWindow
 from .club_dialog import ClubDetailsDialog, NewClubDialog, load_logo
 from .competition_window import CompetitionWindow
@@ -51,7 +52,8 @@ COLUMNS = [("competition", "Competition", 220), ("classes", "Boat classes", 130)
 
 class FrontWindow(tk.Tk):
     def __init__(self, settings: Settings, club: Club):
-        super().__init__()
+        super().__init__(className=APP_CLASS)
+        set_app_icon(self)
         self.settings = settings
         self.club = club
         self.next_club: Club | None = None                   # set when switching club
@@ -154,8 +156,6 @@ class FrontWindow(tk.Tk):
         self._logo = load_logo(self, self.club.logo)        # missing or unreadable: go without
         self.logo_label.configure(image=self._logo or "")
         self.logo_label.pack_configure(padx=(0, 12) if self._logo is not None else 0)
-        if self._logo is not None:
-            self.iconphoto(True, self._logo)                 # title bar / dock, for every window
 
     # -- the list ---------------------------------------------------------------------------
 

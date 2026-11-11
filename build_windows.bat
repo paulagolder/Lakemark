@@ -26,6 +26,7 @@ if errorlevel 1 (
 echo Building...
 %PYTHON% -m PyInstaller --noconfirm --clean --onefile --windowed ^
     --name lakemark ^
+    --icon "%CD%\app\resources\lakemark.ico" ^
     --add-data "%CD%\app\resources;app\resources" ^
     --distpath dist --workpath build --specpath build ^
     main.py

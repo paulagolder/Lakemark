@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- Lakemark's icon: an RC yacht's sails on a lake. The PNGs and .ico are made from this
+       by build_linux.sh (see app/resources). -->
+  <rect x="8" y="8" width="240" height="240" rx="48" fill="#2f8fd4"/>
+  <path d="M8 172 H248 V200 A48 48 0 0 1 200 248 H56 A48 48 0 0 1 8 200 Z" fill="#0f4c84"/>
+  <!-- mainsail and jib, either side of the mast -->
+  <path d="M134 36 L134 158 L204 158 Z" fill="#ffffff"/>
+  <path d="M124 56 L124 158 L66 158 Z" fill="#e8f1f8"/>
+  <rect x="126" y="30" width="6" height="134" rx="2" fill="#2b2b2b"/>
+  <!-- hull -->
+  <path d="M52 164 H212 L194 186 H72 Z" fill="#d6322f"/>
+</svg>

@@ -109,7 +109,7 @@ on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
     python main.py                   # opens the default club, in ~/.lakemark
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # Lakemark 1.08 (11 November 2026)
+    python main.py --version         # Lakemark 1.09 (11 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -182,6 +182,11 @@ Data is not part of the program: replacing it with a new build never touches any
     ./build_linux.sh                 # runs the tests, then builds dist/lakemark
 
 It runs on the Linux version it was built on and newer ones, so build on the oldest one you need.
+
+A Linux program file carries no icon of its own: a launcher (`.desktop` file) gives it one. Copy
+`app/resources/lakemark.png` to `~/.local/share/icons/hicolor/256x256/apps/`, and put
+`Icon=lakemark` and `StartupWMClass=Lakemark` in the launcher, so the menu, the desktop and the
+taskbar all show it.
 
 The build also makes a **portable copy** for a USB stick, `dist/Lakemark/`:
 
@@ -302,8 +307,13 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             sailors_window.py   the Club sailors window
             boat_classes_window.py  the Boat classes window
             sail_chooser.py     asks which sailor an ambiguous sail number means
-        resources/              help.txt, the text of Info > Help (keep it in step with this README), and RMBC's logo: club_logo.svg (the original) and club_logo.png (made from it by
-                                build_linux.sh), given to the RMBC folder made from a pre-1.05 data folder
+            app_icon.py         the Lakemark icon on every window
+        resources/
+            help.txt            the text of Info > Help (keep it in step with this README)
+            lakemark.svg        Lakemark's icon; lakemark.png (the windows' icon) and lakemark.ico
+                                (the Windows program file's) are made from it by build_linux.sh
+            club_logo.svg       RMBC's logo; club_logo.png is made from it by build_linux.sh, and
+                                given to the RMBC folder made from a pre-1.05 data folder
     tests/                      the same layout as app/: python -m unittest discover -s tests -t .
 
 The layers only call downwards: ui uses services, storage and model; services use storage and

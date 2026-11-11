@@ -22,14 +22,16 @@ from ..storage.club_store import convert_old_folder, find_club, has_old_files, l
 from ..storage.errors import StorageError
 from ..storage.settings_store import (DEFAULT_TITLE, RMBC_LOGO_FILE, Settings, load_settings,
                                       old_title, save_settings)
+from .app_icon import APP_CLASS, set_app_icon
 from .club_dialog import NewClubDialog
 from .front_window import FrontWindow
 
 
 def run(data_dir, club: str | None = None) -> None:
     data_dir = Path(data_dir)
-    root = tk.Tk()                       # for the questions asked before a club's window opens
+    root = tk.Tk(className=APP_CLASS)    # for the questions asked before a club's window opens
     root.withdraw()
+    set_app_icon(root)
     root.title(DEFAULT_TITLE)
     try:
         settings = load_settings(data_dir)
