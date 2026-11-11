@@ -70,8 +70,11 @@ class FrontWindow(tk.Tk):
     # -- building the window ----------------------------------------------------------------
 
     def _build_menu(self) -> None:
-        menubar = tk.Menu(self)
-        file_menu = tk.Menu(menubar, tearoff=False)
+        # a row of menu buttons rather than Tk's own menu bar, which cannot put Info at the right
+        menubar = ttk.Frame(self, padding=(4, 2, 4, 0))
+        menubar.pack(side="top", fill="x")
+        ttk.Separator(self, orient="horizontal").pack(side="top", fill="x")
+        file_menu = self._menu_button(menubar, "File", "left")
         file_menu.add_command(label="New competition...", accelerator="Ctrl+N",
                               command=self.new_competition)
         file_menu.add_command(label="Refresh list", accelerator="F5", command=self.refresh)
@@ -80,18 +83,24 @@ class FrontWindow(tk.Tk):
         file_menu.add_command(label="Boat classes...", command=self.edit_boat_classes)
         file_menu.add_separator()
         file_menu.add_command(label="Quit", accelerator="Ctrl+Q", command=self.destroy)
-        menubar.add_cascade(label="File", menu=file_menu)
-        self.club_menu = tk.Menu(menubar, tearoff=False, postcommand=self._fill_club_menu)
-        menubar.add_cascade(label="Club", menu=self.club_menu)
-        info_menu = tk.Menu(menubar, tearoff=False)
+        self.club_menu = self._menu_button(menubar, "Club", "left")
+        self.club_menu.configure(postcommand=self._fill_club_menu)
+        info_menu = self._menu_button(menubar, "Info", "right")
         info_menu.add_command(label="Help", accelerator="F1", command=self.show_help)
         info_menu.add_command(label="About Lakemark", command=self.show_about)
-        menubar.add_cascade(label="Info", menu=info_menu)
-        self.config(menu=menubar)
         self.bind("<Control-n>", lambda e: self.new_competition())
         self.bind("<F5>", lambda e: self.refresh())
         self.bind("<F1>", lambda e: self.show_help())
         self.bind("<Control-q>", lambda e: self.destroy())
+
+    @staticmethod
+    def _menu_button(menubar: ttk.Frame, label: str, side: str) -> tk.Menu:
+        """A button on the menu row that drops down a menu; returns the menu, to fill."""
+        button = tk.Menubutton(menubar, text=label, relief="flat", padx=8, pady=2)
+        button.pack(side=side)
+        menu = tk.Menu(button, tearoff=False)
+        button.configure(menu=menu)
+        return menu
 
     def _build_widgets(self) -> None:
         header = ttk.Frame(self, padding=(12, 10, 12, 4))
