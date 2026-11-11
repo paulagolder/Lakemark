@@ -6,11 +6,15 @@
 #
 # Makes STICK/Lakemark/ (see portable/README.txt):
 #
-#     lakemark             the program
+#     lakemark             the program for Linux
+#     lakemark.exe         the program for Windows
 #     output/              exported web pages
 #     system/              settings, and a folder for each club (sailors, classes, competitions)
 #
 # Builds the program first (./build_linux.sh) if it is missing or older than the code.
+# The Windows program cannot be built on Linux, so it is downloaded from the GitHub release of
+# this version (v1.07 for version 1.07 in app/__init__.py) and kept in dist/ for next time. With
+# no release of this version yet, or no internet, the stick gets the Linux program only.
 #
 # A new stick gets a copy of the data folder's properties.xml (exporting to output/ on the
 # stick) and its club folders (each one holding its <club>Club.xml). A stick that already has
@@ -44,6 +48,29 @@ echo "Putting the program on $target ..."
 mkdir -p "$target/output" "$target/system"
 cp "$portable/lakemark" "$target/"
 cp "$portable/system/README.txt" "$portable/system/start-linux.sh" "$target/system/"
+
+# The Windows program, from this version's GitHub release.
+version="$(sed -n 's/^__version__ = "\(.*\)".*/\1/p' app/__init__.py)"
+windows="dist/lakemark-$version-windows.exe"
+repo="$(git remote get-url origin 2>/dev/null | sed 's|\.git$||')"
+repo="${repo:-https://github.com/paulagolder/Lakemark}"
+if [ ! -s "$windows" ]; then
+    echo "Downloading the Windows program (version $version)..."
+    if curl -fsSL -o "$windows.part" "$repo/releases/download/v$version/lakemark-$version-windows.exe"; then
+        mv "$windows.part" "$windows"
+    else
+        rm -f "$windows.part"
+    fi
+fi
+if [ -s "$windows" ]; then
+    cp "$windows" "$target/lakemark.exe"
+    windows_note="Windows: double-click lakemark.exe."
+else
+    windows_note="No Windows program: version $version is not released on GitHub yet (tag v$version
+and push it), or there is no internet. Run this again once it is."
+    [ -f "$target/lakemark.exe" ] && windows_note="$windows_note
+The lakemark.exe already on the stick is from an older version."
+fi
 
 # A club folder is one holding its <abbreviation>Club.xml: RMBC/RMBCClub.xml.
 clubs_in() {
@@ -94,4 +121,5 @@ else
         echo "exFAT runs it directly, and still works on Windows."
     fi
 fi
+echo "$windows_note"
 echo "Eject the stick before you unplug it."

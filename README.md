@@ -109,7 +109,7 @@ on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
     python main.py                   # opens the default club, in ~/.lakemark
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # Lakemark 1.07 (11 November 2026)
+    python main.py --version         # Lakemark 1.08 (11 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -194,6 +194,11 @@ The build also makes a **portable copy** for a USB stick, `dist/Lakemark/`:
 To make a stick, plug it in and run
 
     ./make_stick.sh /media/$USER/STICK         # data from ~/.lakemark (or name another)
+
+It also puts the Windows program on the stick as `lakemark.exe`, so one stick works on Linux and
+Windows with the same data. That cannot be built on Linux, so it is downloaded from this version's
+GitHub release (and kept in `dist/`): release the version (tag and push it) before making sticks,
+or the stick gets the Linux program only.
 
 It builds the program if needed and copies the club folders and `properties.xml` into
 `system/` (with `output_folder` set to `output`). On a stick that already has data it only updates the

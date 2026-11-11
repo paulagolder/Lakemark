@@ -89,7 +89,7 @@ Once the club is handed over, only one person should go on entering its results,
 
 # On a USB stick
 
-A portable copy is a Lakemark folder holding the program, an output folder (the web pages you export: the only folder you need to open) and a system folder (the program's own files: leave it alone). Keep the three together, and close the program before unplugging the stick.
+A portable copy is a Lakemark folder holding the program (lakemark for Linux, lakemark.exe for Windows), an output folder (the web pages you export: the only folder you need to open) and a system folder (the program's own files: leave it alone). Both programs use the same folders, so the results are the same on either kind of computer. Keep them together, and close the program before unplugging the stick.
 
 If the program will not start from the stick on Linux, open a terminal and run
 
