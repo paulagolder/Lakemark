@@ -1,11 +1,12 @@
 """start.py - starting the program: which club to open, then its window.
 
-    run(data_dir, club="CwMBC")         # club: from --club; None: the default club
+    run(data_dir, club="CwMBC")         # club: from --club; None: the club chosen last time
 
-The club opened is the one asked for with --club, otherwise the settings' default club,
-otherwise the first one. When --club names a club that is not there yet, the program offers to
-make it, so a new club's launcher sets the club up the first time it is used. With no clubs at
-all (a new data folder), it asks for the first one.
+The club opened is the one asked for with --club, otherwise the club chosen last time
+(default_club in properties.xml). When that club is not in the data folder any more, or none
+has been chosen yet, the window opens with no club, headed Lakemark, to choose or make one.
+When --club names a club that is not there yet, the program offers to make it, so a new club's
+launcher sets the club up the first time it is used.
 
 A data folder from before version 1.05 is first turned into an RMBC club folder (see
 storage/club_store.py), which becomes the default club.
@@ -39,10 +40,7 @@ def run(data_dir, club: str | None = None) -> None:
         chosen = choose_club(root, settings, club)
     finally:
         root.destroy()
-    while chosen is not None:
-        window = FrontWindow(settings, chosen)
-        window.mainloop()
-        chosen = window.next_club
+    FrontWindow(settings, chosen).mainloop()
 
 
 def convert(root: tk.Misc, settings: Settings) -> None:
@@ -63,32 +61,17 @@ def convert(root: tk.Misc, settings: Settings) -> None:
 
 
 def choose_club(root: tk.Misc, settings: Settings, wanted: str | None) -> Club | None:
-    """The club to open, or None to stop (no club, and none was made)."""
+    """The club to open, or None to open with no club chosen. The window remembers the club
+    (FrontWindow.set_club)."""
     data_dir = settings.data_dir
     if wanted:
         club = find_club(data_dir, wanted)
         if club is not None:
-            return _remember_first(settings, club)
+            return club
         names = ", ".join(c.abbreviation for c in list_clubs(data_dir)) or "none yet"
         if not messagebox.askyesno(
                 DEFAULT_TITLE, f"There is no club {wanted} in {data_dir} (clubs: {names}).\n\n"
                 f"Set up {wanted} now?", parent=root):
             return None
-        return _remember_first(settings, NewClubDialog(root, data_dir, wanted.strip()).show())
-    clubs = list_clubs(data_dir)
-    club = find_club(data_dir, settings.default_club) if settings.default_club else None
-    if club is None and clubs:
-        club = clubs[0]
-    if club is None:
-        club = NewClubDialog(root, data_dir, message=(
-            f"{DEFAULT_TITLE} keeps race results for a club. To start, give the club's "
-            "abbreviation and title.")).show()
-    return _remember_first(settings, club)
-
-
-def _remember_first(settings: Settings, club: Club | None) -> Club | None:
-    """With no default club yet, the first club opened becomes it."""
-    if club is not None and not settings.default_club:
-        settings.default_club = club.abbreviation
-        save_settings(settings)
-    return club
+        return NewClubDialog(root, data_dir, wanted.strip()).show()
+    return find_club(data_dir, settings.default_club) if settings.default_club else None

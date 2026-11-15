@@ -15,8 +15,8 @@ the program needs:
 Both programs use the same system and output folders, so the results are the same whichever
 computer you use. Keep them together: copy or back up the whole Lakemark folder.
 
-The program opens with the default club (the Club menu switches club, and sets which one it
-opens with). To open a particular club, start it with the club's abbreviation:
+The program opens with the club chosen last (File > Choose club changes club). To open a
+particular club, start it with the club's abbreviation:
 
     lakemark --club CwMBC            (lakemark.exe --club CwMBC on Windows)
 

@@ -60,9 +60,14 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual((settings.default_club, settings.default_rows, settings.default_columns),
                          ("", DEFAULT_ROWS, MAX_RACES))
 
+    def test_old_default_output_folders_get_the_new_one(self):
+        for old in ("~/Documents/raceresult_output", "~/Documents/lakemark_output"):
+            self.write(f"<properties><output_folder>{old}</output_folder></properties>")
+            self.assertEqual(load_settings(self.dir).output_folder, "~/Documents/Lakemark_output")
+
     def test_output_folder(self):
         self.assertEqual(load_settings(self.dir).output_dir,
-                         Path.home() / "Documents" / "lakemark_output")
+                         Path.home() / "Documents" / "Lakemark_output")
         absolute = Path(self._tmp.name) / "results"      # with its drive letter on Windows
         self.write(f"<properties><output_folder>{absolute}</output_folder></properties>")
         self.assertEqual(load_settings(self.dir).output_dir, absolute)

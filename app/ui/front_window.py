@@ -1,8 +1,7 @@
 """front_window.py - the first window: one club's competitions.
 
-    window = FrontWindow(settings, club)
+    window = FrontWindow(settings, club)        # club: None to start with no club chosen
     window.mainloop()
-    window.next_club            # the club to open next (Club menu), or None if it was closed
 
 The club's competition files (*.cxml, in its folder in the data folder) are listed here.
 Double-click one (or select it and click Open) to open it in its own window. Edit changes a
@@ -10,10 +9,14 @@ competition's name, classes and so on (and its file name to match the name); New
 file in the club's folder. Delete takes it off the list by renaming the file to .cxml.deleted,
 so it can be brought back.
 
-The Club menu switches to another club (closing this club's windows), makes a new club,
-changes this club's title and logo, and sets which club the program opens with. Export club
-saves the club as a zip file, to hand it over to another race manager; Import club adds a club
-from such a file.
+Until a club is chosen the window is headed Lakemark, with Lakemark's icon, and the Club menu
+is greyed out. The File menu chooses a club from those in the data folder, makes a new club, or
+imports one from a zip file made by Export club; the club becomes the heading, with its logo,
+and is remembered (properties.xml) as the club to open with next time. Choosing another club
+closes this club's competition windows.
+
+The Club menu starts a new competition, changes the club's title and logo, edits its sailors
+and boat classes, and exports the club as a zip file, to hand it over to another race manager.
 
 The Info menu shows the help (F1) and About: the version, and where this club's files are.
 """
@@ -34,13 +37,12 @@ from ..storage.competition_store import (
     update_competition_details,
 )
 from ..storage.boat_class_store import boat_classes_or_defaults
-from ..storage.club_store import list_clubs
 from ..storage.club_transfer import export_club, export_filename, import_club
 from ..storage.errors import StorageError
-from ..storage.settings_store import Settings, save_settings
-from .app_icon import APP_CLASS, set_app_icon
+from ..storage.settings_store import DEFAULT_TITLE, Settings, save_settings
+from .app_icon import APP_CLASS, ICON_FILE, set_app_icon
 from .boat_classes_window import BoatClassesWindow
-from .club_dialog import ClubDetailsDialog, NewClubDialog, load_logo
+from .club_dialog import ChooseClubDialog, ClubDetailsDialog, NewClubDialog, load_logo
 from .competition_window import CompetitionWindow
 from .competition_dialog import CompetitionDialog
 from .info_windows import AboutWindow, HelpWindow
@@ -51,12 +53,11 @@ COLUMNS = [("competition", "Competition", 220), ("classes", "Boat classes", 130)
 
 
 class FrontWindow(tk.Tk):
-    def __init__(self, settings: Settings, club: Club):
+    def __init__(self, settings: Settings, club: Club | None = None):
         super().__init__(className=APP_CLASS)
         set_app_icon(self)
         self.settings = settings
-        self.club = club
-        self.next_club: Club | None = None                   # set when switching club
+        self.club: Club | None = None                        # None: no club chosen yet
         self.geometry("760x480")
         self.minsize(600, 360)
         self._logo: tk.PhotoImage | None = None
@@ -66,8 +67,7 @@ class FrontWindow(tk.Tk):
 
         self._build_menu()
         self._build_widgets()
-        self._show_club()
-        self.refresh()
+        self.set_club(club)
 
     # -- building the window ----------------------------------------------------------------
 
@@ -77,16 +77,14 @@ class FrontWindow(tk.Tk):
         menubar.pack(side="top", fill="x")
         ttk.Separator(self, orient="horizontal").pack(side="top", fill="x")
         file_menu = self._menu_button(menubar, "File", "left")
-        file_menu.add_command(label="New competition...", accelerator="Ctrl+N",
-                              command=self.new_competition)
-        file_menu.add_command(label="Refresh list", accelerator="F5", command=self.refresh)
-        file_menu.add_separator()
-        file_menu.add_command(label="Club sailors...", command=self.edit_sailors)
-        file_menu.add_command(label="Boat classes...", command=self.edit_boat_classes)
+        file_menu.add_command(label="Choose club...", command=self.choose_club)
+        file_menu.add_command(label="New club...", command=self.new_club)
+        file_menu.add_command(label="Import club...", command=self.import_club)
         file_menu.add_separator()
         file_menu.add_command(label="Quit", accelerator="Ctrl+Q", command=self.destroy)
         self.club_menu = self._menu_button(menubar, "Club", "left")
         self.club_menu.configure(postcommand=self._fill_club_menu)
+        self.club_button = self.club_menu.master             # greyed out until a club is chosen
         info_menu = self._menu_button(menubar, "Info", "right")
         info_menu.add_command(label="Help", accelerator="F1", command=self.show_help)
         info_menu.add_command(label="About Lakemark", command=self.show_about)
@@ -113,8 +111,8 @@ class FrontWindow(tk.Tk):
         titles.pack(side="left", fill="x", anchor="w")
         self.title_label = ttk.Label(titles, font=("TkDefaultFont", 16, "bold"))
         self.title_label.pack(anchor="w")
-        ttk.Label(titles, text=f"{self.club.abbreviation} competitions in {self.club.folder}",
-                  foreground="gray40").pack(anchor="w")
+        self.subtitle_label = ttk.Label(titles, foreground="gray40")
+        self.subtitle_label.pack(anchor="w")
 
         self.status_var = tk.StringVar()
         ttk.Label(self, textvariable=self.status_var, relief="sunken", anchor="w",
@@ -126,10 +124,12 @@ class FrontWindow(tk.Tk):
         self.open_button.pack(side="left", padx=2)
         self.edit_button = ttk.Button(buttons, text="Edit...", command=self.edit_details)
         self.edit_button.pack(side="left", padx=2)
-        ttk.Button(buttons, text="New...", command=self.new_competition).pack(side="left", padx=2)
+        self.new_button = ttk.Button(buttons, text="New...", command=self.new_competition)
+        self.new_button.pack(side="left", padx=2)
         self.delete_button = ttk.Button(buttons, text="Delete", command=self.delete_selected)
         self.delete_button.pack(side="left", padx=2)
-        ttk.Button(buttons, text="Refresh", command=self.refresh).pack(side="left", padx=2)
+        self.refresh_button = ttk.Button(buttons, text="Refresh", command=self.refresh)
+        self.refresh_button.pack(side="left", padx=2)
         ttk.Button(buttons, text="Quit", command=self.destroy).pack(side="right", padx=2)
 
         body = ttk.Frame(self, padding=(12, 4, 12, 8))
@@ -150,12 +150,25 @@ class FrontWindow(tk.Tk):
         self.tree.bind("<F2>", lambda e: self.edit_details())
 
     def _show_club(self) -> None:
-        """Show the club's title and logo (again, after they are changed)."""
-        self.title(self.club.title)
-        self.title_label.configure(text=self.club.title)
-        self._logo = load_logo(self, self.club.logo)        # missing or unreadable: go without
+        """Show the club's title and logo (again, after they are changed), or Lakemark's while
+        no club is chosen."""
+        club = self.club
+        if club is None:
+            title, logo = DEFAULT_TITLE, ICON_FILE
+            subtitle = "Choose a club with File > Choose club, or make one with File > New club."
+        else:
+            title, logo = club.title, club.logo
+            subtitle = f"{club.abbreviation} competitions in {club.folder}"
+        self.title(title)
+        self.title_label.configure(text=title)
+        self.subtitle_label.configure(text=subtitle)
+        self._logo = load_logo(self, logo)                   # missing or unreadable: go without
         self.logo_label.configure(image=self._logo or "")
         self.logo_label.pack_configure(padx=(0, 12) if self._logo is not None else 0)
+        state = "normal" if club is not None else "disabled"
+        self.club_button.configure(state=state)
+        for button in (self.new_button, self.refresh_button):
+            button.state(["!disabled" if club is not None else "disabled"])
 
     # -- the list ---------------------------------------------------------------------------
 
@@ -166,6 +179,10 @@ class FrontWindow(tk.Tk):
             select = self._paths[index] if index is not None else None
         self.tree.delete(*self.tree.get_children())
         self._paths = []
+        if self.club is None:
+            self.status_var.set("No club chosen.")
+            self._selection_changed()
+            return
         boat_classes = self._boat_classes()
         for path, competition, error in list_competitions(self.club.folder):
             if competition is None:
@@ -226,6 +243,8 @@ class FrontWindow(tk.Tk):
             self.refresh()                # race day counts may have changed
 
     def new_competition(self) -> None:
+        if self.club is None:
+            return
         boat_classes = self._boat_classes()
         competition = CompetitionDialog(self, boat_classes=boat_classes).show()
         if competition is None:
@@ -329,39 +348,56 @@ class FrontWindow(tk.Tk):
     # -- clubs ------------------------------------------------------------------------------
 
     def _fill_club_menu(self) -> None:
-        """The Club menu, made afresh each time it opens, so it lists every club."""
+        """The Club menu, made afresh each time it opens, as its labels name the club."""
         menu = self.club_menu
         menu.delete(0, "end")
-        current = tk.StringVar(master=menu, value=self.club.abbreviation)
-        self._club_choice = current                          # kept, or the tick is forgotten
-        for club in list_clubs(self.settings.data_dir):
-            label = (club.abbreviation if club.title == club.abbreviation
-                     else f"{club.abbreviation}: {club.title}")
-            menu.add_radiobutton(label=label, variable=current, value=club.abbreviation,
-                                 command=lambda c=club: self.switch_club(c))
+        if self.club is None:
+            return
+        name = self.club.abbreviation
+        menu.add_command(label="New competition...", accelerator="Ctrl+N",
+                         command=self.new_competition)
         menu.add_separator()
-        menu.add_command(label="New club...", command=self.new_club)
-        menu.add_command(label=f"{self.club.abbreviation} club details (title, logo)...",
-                         command=self.edit_club)
-        is_default = self.club.is_called(self.settings.default_club)
-        menu.add_command(label=f"Open with {self.club.abbreviation} when the program starts",
-                         state="disabled" if is_default else "normal", command=self.make_default)
+        menu.add_command(label=f"{name} club details (title, logo)...", command=self.edit_club)
+        menu.add_command(label="Club sailors...", command=self.edit_sailors)
+        menu.add_command(label="Boat classes...", command=self.edit_boat_classes)
         menu.add_separator()
-        menu.add_command(label=f"Export {self.club.abbreviation} club...", command=self.export_club)
-        menu.add_command(label="Import club...", command=self.import_club)
+        menu.add_command(label=f"Export {name} club...", command=self.export_club)
+
+    def set_club(self, club: Club | None) -> None:
+        """Show club's competitions (None: no club), and remember it as the one to open with."""
+        for window in list(self._open.values()):
+            if window.winfo_exists():
+                window.destroy()
+        self._open.clear()
+        self.club = club
+        if club is not None and not club.is_called(self.settings.default_club):
+            self.settings.default_club = club.abbreviation
+            if not save_settings(self.settings):
+                messagebox.showerror("Club", "Could not save the settings.", parent=self)
+        self._show_club()
+        self.refresh()
 
     def switch_club(self, club: Club) -> None:
-        """Close this club's windows and open the club's. Its competitions are already saved."""
-        if club.folder.resolve() == self.club.folder.resolve():
+        """Change to club, closing this club's competition windows (asking first if any are
+        open: a race day being edited loses what has not been saved)."""
+        if self.club is not None and club.folder.resolve() == self.club.folder.resolve():
             return
-        self.next_club = club
-        self.destroy()
+        open_windows = [w for w in self._open.values() if w.winfo_exists()]
+        if open_windows and not messagebox.askyesno(
+                "Choose club", f"Close {self.club.abbreviation}'s open competitions and change "
+                f"to {club.abbreviation}?\n\nA race day being edited loses anything not saved.",
+                parent=self):
+            return
+        self.set_club(club)
+
+    def choose_club(self) -> None:
+        club = ChooseClubDialog(self, self.settings.data_dir, self.club).show()
+        if club is not None:
+            self.switch_club(club)
 
     def new_club(self) -> None:
         club = NewClubDialog(self, self.settings.data_dir).show()
-        if club is not None and messagebox.askyesno(
-                "New club", f"Made {club.abbreviation}, in {club.folder}.\n\nSwitch to it now? "
-                "(This club's windows will close.)", parent=self):
+        if club is not None:
             self.switch_club(club)
 
     def edit_club(self) -> None:
@@ -383,7 +419,7 @@ class FrontWindow(tk.Tk):
             return
         messagebox.showinfo("Export club", f"Saved {self.club.abbreviation}'s sailors, classes, "
                             f"logo and competitions to\n{path}\n\nThe other race manager chooses "
-                            "Club > Import club... and picks this file.", parent=self)
+                            "File > Import club... and picks this file.", parent=self)
 
     def import_club(self) -> None:
         """Add a club from a zip file made by Export club."""
@@ -396,15 +432,6 @@ class FrontWindow(tk.Tk):
         except StorageError as exc:
             messagebox.showerror("Import club", str(exc), parent=self)
             return
-        if messagebox.askyesno("Import club", f"Imported {club.title} ({club.abbreviation}), "
-                               f"into {club.folder}.\n\nSwitch to it now? (This club's windows "
-                               "will close.)", parent=self):
-            self.switch_club(club)
-
-    def make_default(self) -> None:
-        self.settings.default_club = self.club.abbreviation
-        if save_settings(self.settings):
-            self.status_var.set(f"The program will open with {self.club.abbreviation} from now on "
-                                "(unless started with --club).")
-        else:
-            messagebox.showerror("Club", "Could not save the settings.", parent=self)
+        messagebox.showinfo("Import club", f"Imported {club.title} ({club.abbreviation}), "
+                            f"into {club.folder}.", parent=self)
+        self.switch_club(club)

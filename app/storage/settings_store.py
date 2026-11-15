@@ -7,13 +7,14 @@ model/club.py) and properties.xml, the settings for every club:
       <default_club>RMBC</default_club>
       <default_rows>5</default_rows>
       <default_columns>4</default_columns>
-      <output_folder>~/Documents/lakemark_output</output_folder>
+      <output_folder>~/Documents/Lakemark_output</output_folder>
     </properties>
 
-default_club is the club the program opens with, unless it is started with --club.
+default_club is the club chosen last time, which the program opens with (unless it is started
+with --club); blank, or a club no longer in the data folder: it opens with no club chosen.
 
 output_folder is where Export HTML writes, in a sub folder for the club and one for the
-competition (for example ~/Documents/lakemark_output/RMBC/DF95_2026/). ~ and $VARIABLES are
+competition (for example ~/Documents/Lakemark_output/RMBC/DF95_2026/). ~ and $VARIABLES are
 expanded. A relative folder ("output") is in the folder that holds the data folder.
 
 Before version 1.05 properties.xml also had the club's <title>; it is now in the club's own
@@ -49,7 +50,10 @@ DATA_DIR = Path.home() / ".lakemark"
 OLD_DATA_DIR = Path.home() / ".pyraceresults"   # the data folder before version 1.04
 PROPERTIES_FILE = "properties.xml"
 DEFAULT_TITLE = "Lakemark"               # the program's windows, before a club is chosen
-DEFAULT_OUTPUT_FOLDER = "~/Documents/lakemark_output"
+DEFAULT_OUTPUT_FOLDER = "~/Documents/Lakemark_output"
+# earlier defaults: nothing in the program sets the output folder, so a file holding one of these
+# was never given another, and gets the default of this version
+OLD_OUTPUT_FOLDERS = ("~/Documents/raceresult_output", "~/Documents/lakemark_output")
 SYSTEM_FOLDER = "system"                 # beside the program: a portable copy's data folder
 PORTABLE_OUTPUT_FOLDER = "output"        # beside the program, in a portable copy
 # RMBC's logo, made from club_logo.svg. Before 1.05 every copy showed it; now each club has
@@ -60,7 +64,7 @@ RMBC_LOGO_FILE = Path(__file__).parent.parent / "resources" / "club_logo.png"
 @dataclass
 class Settings:
     data_dir: Path
-    default_club: str = ""                           # blank: the first club
+    default_club: str = ""                           # the club chosen last; blank: none yet
     default_rows: int = DEFAULT_ROWS
     default_columns: int = DEFAULT_RACES             # races in a new race day
     output_folder: str = DEFAULT_OUTPUT_FOLDER       # as written in the file, perhaps with ~
@@ -98,6 +102,11 @@ def _default_output(data_dir: Path) -> str:
     return PORTABLE_OUTPUT_FOLDER if data_dir.name == SYSTEM_FOLDER else DEFAULT_OUTPUT_FOLDER
 
 
+def _output_folder(root: ET.Element, data_dir: Path) -> str:
+    folder = (root.findtext("output_folder") or "").strip()
+    return _default_output(data_dir) if not folder or folder in OLD_OUTPUT_FOLDERS else folder
+
+
 def _number(root: ET.Element, tag: str, default: int, maximum: int) -> int:
     try:
         return min(max(int((root.findtext(tag) or "").strip()), 1), maximum)
@@ -111,7 +120,7 @@ def settings_from_xml(root: ET.Element, data_dir: Path) -> Settings:
         default_club=(root.findtext("default_club") or "").strip(),
         default_rows=_number(root, "default_rows", DEFAULT_ROWS, MAX_PLACES),
         default_columns=_number(root, "default_columns", DEFAULT_RACES, MAX_RACES),
-        output_folder=(root.findtext("output_folder") or "").strip() or _default_output(data_dir),
+        output_folder=_output_folder(root, data_dir),
     )
 
 

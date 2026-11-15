@@ -1,5 +1,7 @@
-"""club_dialog.py - asks for a new club's abbreviation and title, or changes a club's title and logo.
+"""club_dialog.py - chooses a club, asks for a new club's abbreviation and title, or changes a
+club's title and logo.
 
+    club = ChooseClubDialog(parent, data_dir, current).show()   # the Club chosen, or None
     club = NewClubDialog(parent, data_dir).show()           # the new Club (made on disk), or None
     changed = ClubDetailsDialog(parent, club).show()        # True if the title or logo changed
 
@@ -15,7 +17,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from ..model.club import MAX_ABBREVIATION, Club
-from ..storage.club_store import create_club, remove_logo, save_club, set_logo
+from ..storage.club_store import create_club, list_clubs, remove_logo, save_club, set_logo
 from ..storage.errors import StorageError
 
 HINT = {"foreground": "gray40"}
@@ -33,6 +35,68 @@ def load_logo(master: tk.Misc, path: Path | None) -> tk.PhotoImage | None:
         return None
     shrink = -(-image.height() // LOGO_HEIGHT)          # rounded up
     return image.subsample(shrink) if shrink > 1 else image
+
+
+def club_label(club: Club) -> str:
+    """'CwMBC: Chasewater Model Boat Club', or just the abbreviation when it has no title."""
+    return club.abbreviation if club.title == club.abbreviation else f"{club.abbreviation}: {club.title}"
+
+
+class ChooseClubDialog(tk.Toplevel):
+    """Lists the clubs in the data folder (each folder holding its <club>Club.xml) to pick one."""
+
+    def __init__(self, parent: tk.Misc, data_dir, current: Club | None = None):
+        super().__init__(parent)
+        self.title("Choose club")
+        self.resizable(False, False)
+        if parent.winfo_viewable():
+            self.transient(parent)
+        self.result: Club | None = None
+        self.clubs = list_clubs(data_dir)
+
+        frame = ttk.Frame(self, padding=16)
+        frame.grid()
+        ttk.Label(frame, text=f"Clubs in {data_dir}:", wraplength=380, justify="left").grid(
+            row=0, column=0, sticky="w")
+        self.listbox = tk.Listbox(frame, width=48, height=min(max(len(self.clubs), 3), 12),
+                                  activestyle="dotbox", exportselection=False)
+        self.listbox.grid(row=1, column=0, sticky="we", pady=(4, 0))
+        for club in self.clubs:
+            self.listbox.insert("end", club_label(club))
+        if self.clubs:
+            index = next((i for i, c in enumerate(self.clubs)
+                          if current is not None and c.is_called(current.abbreviation)), 0)
+            self.listbox.selection_set(index)
+            self.listbox.activate(index)
+            self.listbox.see(index)
+        else:
+            ttk.Label(frame, text="There are no clubs yet: make one with File > New club,\n"
+                                  "or add one from a zip file with File > Import club.",
+                      **HINT).grid(row=2, column=0, sticky="w", pady=(6, 0))
+        self.listbox.bind("<Double-Button-1>", lambda e: self._ok())
+
+        buttons = ttk.Frame(frame)
+        buttons.grid(row=3, column=0, pady=(14, 0))
+        self.ok_button = ttk.Button(buttons, text="OK", command=self._ok)
+        self.ok_button.pack(side="left", padx=4)
+        self.ok_button.state(["!disabled" if self.clubs else "disabled"])
+        ttk.Button(buttons, text="Cancel", command=self.destroy).pack(side="left", padx=4)
+        self.bind("<Return>", lambda e: self._ok())
+        self.bind("<Escape>", lambda e: self.destroy())
+
+    def _ok(self) -> None:
+        selection = self.listbox.curselection()
+        if not selection:
+            return
+        self.result = self.clubs[selection[0]]
+        self.destroy()
+
+    def show(self) -> Club | None:
+        self.wait_visibility()
+        self.grab_set()
+        self.listbox.focus_set()
+        self.wait_window(self)
+        return self.result
 
 
 class NewClubDialog(tk.Toplevel):
@@ -63,7 +127,7 @@ class NewClubDialog(tk.Toplevel):
                                                                    padx=(8, 0), pady=(4, 0))
         ttk.Label(frame, text="shown on windows and web pages; blank: the abbreviation",
                   **HINT).grid(row=4, column=1, sticky="w", padx=(8, 0))
-        ttk.Label(frame, text="The logo can be added afterwards, with Club > Club details.",
+        ttk.Label(frame, text="The logo can be added afterwards, with Club > club details.",
                   **HINT).grid(row=5, column=0, columnspan=2, sticky="w", pady=(10, 0))
 
         buttons = ttk.Frame(frame)

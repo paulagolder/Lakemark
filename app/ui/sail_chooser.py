@@ -35,7 +35,7 @@ class SailChooser(tk.Toplevel):
         self.listbox.selection_set(0)
         self.listbox.activate(0)
         if any(not entry for entry, _ in choices):
-            ttk.Label(frame, text="(no tag): give the classes symbols in File > Boat classes.",
+            ttk.Label(frame, text="(no tag): give the classes symbols in Club > Boat classes.",
                       foreground="gray40").pack(anchor="w")
 
         buttons = ttk.Frame(frame)

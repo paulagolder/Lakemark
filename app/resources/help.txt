@@ -8,13 +8,13 @@ Download the program file for your computer from the Releases page: the one endi
 
 Windows may warn "Windows protected your PC", because the program is not code-signed: click More info, then Run anyway.
 
-The first time it runs, with no clubs at all, it asks for one: an abbreviation (such as RMBC, 1 to 10 letters or digits) and a title.
+The window is headed Lakemark until you choose a club. Choose one with File > Choose club..., or make your first with File > New club...: an abbreviation (such as RMBC, 1 to 10 letters or digits) and a title. The club becomes the heading, with its logo, and the Club menu comes alive. Next time, the program opens with the club you chose last.
 
 A new version never touches your data: your clubs, sailors and competitions stay in the .lakemark folder in your home folder (see Where things are kept).
 
 # Competitions
 
-The first window lists the club's competitions.
+The first window lists the club's competitions. Club > New competition... (Ctrl+N) or the New... button starts one.
 
 - Open (or double-click) opens a competition in its own window.
 - New... starts a competition: a name, a year and one or more boat classes, typed as a list separated by commas ("DF65, Victoria"). Each must be one of the club's boat classes.
@@ -47,9 +47,9 @@ The race day window marks a sailor who appears twice in one race.
 
 # Club sailors and boat classes
 
-File > Club sailors... lists the club's sailors, one row per boat: sail number, class, name and tag. "Show class" limits the list to one class. Click Save when done.
+Club > Club sailors... lists the club's sailors, one row per boat: sail number, class, name and tag. "Show class" limits the list to one class. Click Save when done.
 
-File > Boat classes... lists the club's classes. A new club starts with DF65, RG65, DF95 and Victoria. Click Save when done.
+Club > Boat classes... lists the club's classes. A new club starts with DF65, RG65, DF95 and Victoria. Click Save when done.
 
 # Results
 
@@ -64,16 +64,24 @@ Report gives a short text summary of the competition: race days, races, finishes
 
 # Web pages
 
-Export HTML (in a race day window or a results window) writes the table as a web page, with the club's title and logo, ready to email, upload or print. Pages go in the output folder (normally Documents/lakemark_output), in a folder for the club and the competition. Exporting again replaces the page.
+Export HTML (in a race day window or a results window) writes the table as a web page, with the club's title and logo, ready to email, upload or print. Pages go in the output folder (normally Documents/Lakemark_output), in a folder for the club and the competition. Exporting again replaces the page.
 
 # Clubs
 
-The Club menu:
+The File menu:
 
-- lists the clubs, and switches to another (this club's windows close; everything is already saved);
-- New club... makes another club;
+- Choose club... lists the clubs and changes to another. This club's competition windows close (asking first if any are open); everything saved stays saved;
+- New club... makes another club and changes to it;
+- Import club... adds a club from a zip file (see Handing a club over).
+
+The Club menu, once a club is chosen:
+
+- New competition... starts a competition;
 - club details changes the club's title and logo. Choose a PNG or GIF picture: save a JPG logo as PNG first;
-- Open with ... when the program starts sets the club the program opens with.
+- Club sailors... and Boat classes... (see above);
+- Export club... saves the club as a zip file (see Handing a club over).
+
+The program opens with the club chosen last.
 
 To open a particular club straight away, start the program with its abbreviation, for example from a desktop shortcut:
 
@@ -83,7 +91,7 @@ To open a particular club straight away, start the program with its abbreviation
 
 To pass a club on to another race manager, choose Club > Export club.... It saves the club as one zip file: its title, logo, sailors, classes and competitions.
 
-The other race manager chooses Club > Import club... and picks the file; the club appears in their Club menu. Import never overwrites a club they already have.
+The other race manager chooses File > Import club... and picks the file; the program changes to the club, and it appears in their File > Choose club list. Import never overwrites a club they already have.
 
 Once the club is handed over, only one person should go on entering its results, or the two copies will differ.
 

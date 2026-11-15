@@ -34,6 +34,14 @@ class AboutTests(unittest.TestCase):
         self.assertEqual(facts["Club"], "RMBC")
         self.assertEqual(facts["Competitions"], "0")
 
+    def test_no_club_chosen(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            settings = Settings(Path(tmp), output_folder=str(Path(tmp) / "out"))
+            facts = dict(about_facts(settings, None))
+        self.assertEqual(facts["Club"], "none chosen")
+        self.assertNotIn("Club folder", facts)
+        self.assertEqual(facts["Output folder"], str(Path(tmp) / "out"))
+
     def test_help(self):
         text = help_text()
         self.assertTrue(text.startswith("# Lakemark help"))

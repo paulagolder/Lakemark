@@ -285,7 +285,7 @@ class CompetitionWindow(tk.Toplevel):
             return None
         if not members.sailors:
             messagebox.showwarning(
-                "Club sailors", "No club sailors are listed yet. Add them with File > Club sailors "
+                "Club sailors", "No club sailors are listed yet. Add them with Club > Club sailors "
                 "in the competitions window before entering sail numbers.", parent=self)
         return members
 

@@ -27,15 +27,13 @@ class ChooseClubTests(unittest.TestCase):
         settings.default_club = "RMBC"
         self.assertEqual(choose_club(None, settings, None).abbreviation, "RMBC")
 
-    def test_the_first_club_becomes_the_default(self):
-        settings = load_settings(self.dir)
-        self.assertEqual(choose_club(None, settings, None).abbreviation, "CwMBC")
-        self.assertEqual(load_settings(self.dir).default_club, "CwMBC")
+    def test_no_club_chosen_yet(self):
+        self.assertIsNone(choose_club(None, load_settings(self.dir), None))
 
     def test_a_default_club_that_has_gone(self):
         settings = load_settings(self.dir)
         settings.default_club = "XYZ"
-        self.assertEqual(choose_club(None, settings, None).abbreviation, "CwMBC")
+        self.assertIsNone(choose_club(None, settings, None))
 
 
 if __name__ == "__main__":

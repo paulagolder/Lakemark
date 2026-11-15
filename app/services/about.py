@@ -39,23 +39,32 @@ def version_text() -> str:
     return f"{NAME} {__version__} ({version_date()})"
 
 
-def about_facts(settings: Settings, club: Club) -> list[tuple[str, str]]:
-    """The name and value of each fact Info > About lists, about this copy and the open club."""
-    count = sum(1 for _ in list_competitions(club.folder))
-    return [
+def about_facts(settings: Settings, club: Club | None) -> list[tuple[str, str]]:
+    """The name and value of each fact Info > About lists, about this copy and the open club
+    (club None: no club chosen yet)."""
+    facts = [
         ("Version", __version__),
         ("Released", version_date()),
         ("Python", f"{platform.python_version()}  ({_tk_version()})"),
         ("System", f"{platform.system()} {platform.release()} ({platform.machine()})"),
-        ("Club", club.abbreviation if club.title == club.abbreviation
-         else f"{club.abbreviation}: {club.title}"),
-        ("Competitions", str(count)),
-        ("Club folder", str(club.folder)),
+    ]
+    if club is None:
+        facts.append(("Club", "none chosen"))
+    else:
+        facts += [
+            ("Club", club.abbreviation if club.title == club.abbreviation
+             else f"{club.abbreviation}: {club.title}"),
+            ("Competitions", str(sum(1 for _ in list_competitions(club.folder)))),
+            ("Club folder", str(club.folder)),
+        ]
+    facts += [
         ("Data folder", str(settings.data_dir)),
-        ("Output folder", str(settings.club_output_dir(club.abbreviation))),
+        ("Output folder", str(settings.output_dir if club is None
+                              else settings.club_output_dir(club.abbreviation))),
         ("Program", str(Path(sys.executable if getattr(sys, "frozen", False) else sys.argv[0])
                         .resolve())),
     ]
+    return facts
 
 
 def help_text() -> str:

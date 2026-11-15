@@ -1,7 +1,7 @@
 """info_windows.py - the Info menu's windows: Help and About.
 
     HelpWindow(parent)                      the help (resources/help.txt), to read beside the program
-    AboutWindow(parent, settings, club)     the version, this copy's folders and the open club
+    AboutWindow(parent, settings, club)     the version, this copy's folders and the open club (or None)
 
 In the help text a line starting "# " is a heading, and an indented line is shown as typed.
 """
@@ -14,6 +14,7 @@ from tkinter import ttk
 from ..model.club import Club
 from ..services.about import ABOUT_TEXT, NAME, about_facts, help_text, version_text
 from ..storage.settings_store import Settings
+from .app_icon import ICON_FILE
 from .club_dialog import load_logo
 
 
@@ -55,7 +56,7 @@ class HelpWindow(tk.Toplevel):
 
 
 class AboutWindow(tk.Toplevel):
-    def __init__(self, parent: tk.Misc, settings: Settings, club: Club):
+    def __init__(self, parent: tk.Misc, settings: Settings, club: Club | None):
         super().__init__(parent)
         self.title(f"About {NAME}")
         self.resizable(False, False)
@@ -66,7 +67,8 @@ class AboutWindow(tk.Toplevel):
         frame.pack(fill="both", expand=True)
         header = ttk.Frame(frame)
         header.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 12))
-        self._logo = load_logo(self, club.logo)      # kept, or Tk forgets the picture
+        # the club's logo, or Lakemark's icon with no club chosen; kept, or Tk forgets the picture
+        self._logo = load_logo(self, club.logo if club is not None else ICON_FILE)
         if self._logo is not None:
             ttk.Label(header, image=self._logo).pack(side="left", padx=(0, 12))
         ttk.Label(header, text=version_text(), font=("TkDefaultFont", 14, "bold")).pack(

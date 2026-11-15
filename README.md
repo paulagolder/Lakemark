@@ -34,16 +34,18 @@ pyraceresults and used `~/.pyraceresults`; the first run of 1.04 moves that fold
         CwMBC/
             CwMBCClub.xml ...
 
-- `properties.xml`: `default_club`, the club the program opens with; the default number of rows
+- `properties.xml`: `default_club`, the club chosen last, which the program opens with; the default number of rows
   and columns for a new race day; and `output_folder`, where **Export HTML** writes (default
-  `~/Documents/lakemark_output`), in a sub folder for each club.
+  `~/Documents/Lakemark_output`; before version 1.10 it was `lakemark_output`, or
+  `raceresult_output` from the pyraceresults days, and a properties.xml naming one of those now
+  gets `Lakemark_output`), in a sub folder for each club.
 - `<club>Club.xml`: the club's title, shown at the top of the windows and on web pages. Change it,
   and the logo, with **Club > club details**.
 - `<club>Sail.xml`: the club sailors, one `<sail sailnumber="   01" boatclass="DF95" forename=".." surname=".." tag="PG" />` per boat (tag: see below). Edit it with the
-  **File > Club sailors...** menu in the competitions window, then click Save. "Show class" limits the list to one class.
+  **Club > Club sailors...** menu in the competitions window, then click Save. "Show class" limits the list to one class.
 - `<club>Classes.xml`: the boat classes, one `<boatclass key="df95" fullname="DF95" cypher="95" symbol="@" />`
   per class (a new club starts with DF65, RG65, DF95 and Victoria). Edit it with the
-  **File > Boat classes...** menu, then click Save.
+  **Club > Boat classes...** menu, then click Save.
 - `<club>Logo.png` (or `.gif`): the club's logo. Choose it with **Club > club details >
   Choose picture...**, which copies it here. Tk can only show PNG and GIF pictures: save a JPG
   logo as PNG first.
@@ -58,19 +60,23 @@ competitions are the ones in its folder.
 
 ## Clubs
 
-The program opens with the default club, or the one given with `--club`:
+The program opens with the club chosen last (`default_club` in `properties.xml`), or the one
+given with `--club`:
 
     lakemark --club CwMBC
 
 so a launcher (a desktop shortcut) for each club opens that club straight away. If the club named
-is not there yet, the program offers to set it up. The very first time it runs, with no clubs at
-all, it asks for one.
+is not there yet, the program offers to set it up. With no club chosen yet, or when the last one
+is no longer in the data folder, the window is headed Lakemark, with Lakemark's icon, and the
+Club menu is greyed out until a club is chosen.
 
-The **Club** menu in the competitions window lists the clubs and switches to another (closing
-this club's windows; everything is already saved), makes a **New club**, changes the club's
-**details** (title and logo), and sets which club the program **opens with**. A club's
-abbreviation names its folder and files, so it cannot be changed; it is 1 to 10 letters or
-digits.
+The **File** menu in the competitions window chooses a club (**Choose club...** lists the clubs in
+the data folder; changing club closes this club's competition windows, asking first if any are
+open), makes a **New club**, and imports one (**Import club...**, below). The chosen club becomes
+the heading, with its logo. The **Club** menu then starts a **New competition**, changes the
+club's **details** (title and logo), edits its **Club sailors** and **Boat classes**, and exports
+it (**Export club...**). A club's abbreviation names its folder and files, so it cannot be
+changed; it is 1 to 10 letters or digits.
 
 ### Handing a club over
 
@@ -79,8 +85,8 @@ club's folder as one zip file (`CwMBC_club_2026-11-04.zip`): its title, logo, sa
 and competitions, with their backups. Your own settings (`properties.xml`), your other clubs
 and the exported web pages stay behind.
 
-The other race manager (with version 1.05 or later) chooses **Club > Import club...** and picks
-the file; the club appears in their Club menu. Import only accepts a zip with one club folder in
+The other race manager chooses **File > Import club...** (**Club > Import club...** before
+version 1.10; it needs 1.05 or later) and picks the file, and the program changes to that club. Import only accepts a zip with one club folder in
 it, and never overwrites a club they already have with the same abbreviation. Copying the
 club's folder into their data folder by hand does the same.
 
@@ -109,7 +115,7 @@ on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
     python main.py                   # opens the default club, in ~/.lakemark
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # Lakemark 1.09 (11 November 2026)
+    python main.py --version         # Lakemark 1.10 (15 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -156,7 +162,7 @@ each race day's figures and the leading boats in the current results.
 In the race day window, **Export HTML** writes the table as a web page, with each sailor's name under
 their sail number. It goes in `output_folder` (see properties.xml), in the club's folder and the
 competition's HTML folder (`directory`), for example
-`~/Documents/lakemark_output/RMBC/Victoria2026/Race_day_1.html`. Exporting
+`~/Documents/Lakemark_output/RMBC/Victoria2026/Race_day_1.html`. Exporting
 the same race day again replaces its page.
 
 In a results window, **Export HTML** writes that table as `results_current.html` or
@@ -294,8 +300,8 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             about.py            the version, the facts Info > About shows, and the help text
         ui/                     the windows
             start.py            which club to open (--club, the default, or a new one), then its window
-            front_window.py     the first window: a club's competitions, and the Club menu
-            club_dialog.py      New club, and a club's details (title and logo)
+            front_window.py     the first window: a club's competitions, and the File and Club menus
+            club_dialog.py      Choose club, New club, and a club's details (title and logo)
             competition_dialog.py  asks for a competition's details (New and Edit)
             competition_window.py  one competition: its race days and a preview
             race_day_window.py  enter or edit one race day's table
