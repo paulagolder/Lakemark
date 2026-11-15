@@ -1,4 +1,4 @@
-# Lakemark
+# LakeMark
 
 Race results for RC yachts: enter and edit race results for radio-controlled model sailing yachts.
 
@@ -36,9 +36,9 @@ pyraceresults and used `~/.pyraceresults`; the first run of 1.04 moves that fold
 
 - `properties.xml`: `default_club`, the club chosen last, which the program opens with; the default number of rows
   and columns for a new race day; and `output_folder`, where **Export HTML** writes (default
-  `~/Documents/Lakemark_output`; before version 1.10 it was `lakemark_output`, or
-  `raceresult_output` from the pyraceresults days, and a properties.xml naming one of those now
-  gets `Lakemark_output`), in a sub folder for each club.
+  `~/Documents/LakeMark_output`; before version 1.10 it was `lakemark_output`, or
+  `raceresult_output` from the pyraceresults days, and a properties.xml naming one of those (or
+  `Lakemark_output`) now gets `LakeMark_output`), in a sub folder for each club.
 - `<club>Club.xml`: the club's title, shown at the top of the windows and on web pages. Change it,
   and the logo, with **Club > club details**.
 - `<club>Sail.xml`: the club sailors, one `<sail sailnumber="   01" boatclass="DF95" forename=".." surname=".." tag="PG" />` per boat (tag: see below). Edit it with the
@@ -67,7 +67,7 @@ given with `--club`:
 
 so a launcher (a desktop shortcut) for each club opens that club straight away. If the club named
 is not there yet, the program offers to set it up. With no club chosen yet, or when the last one
-is no longer in the data folder, the window is headed Lakemark, with Lakemark's icon, and the
+is no longer in the data folder, the window is headed LakeMark, with LakeMark's icon, and the
 Club menu is greyed out until a club is chosen.
 
 The **File** menu in the competitions window chooses a club (**Choose club...** lists the clubs in
@@ -104,7 +104,7 @@ straight away.
 ## Help and About
 
 The **Info** menu in the competitions window has **Help** (F1), a guide for race managers
-(`app/resources/help.txt`), and **About Lakemark**: the version and its date, the Python and
+(`app/resources/help.txt`), and **About LakeMark**: the version and its date, the Python and
 system it runs on, the open club, and where its folder, the data folder and the output folder
 are. **Copy** puts those facts on the clipboard, to send with a question.
 
@@ -115,7 +115,7 @@ on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
     python main.py                   # opens the default club, in ~/.lakemark
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # Lakemark 1.10 (15 November 2026)
+    python main.py --version         # LakeMark 1.10 (15 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -162,7 +162,7 @@ each race day's figures and the leading boats in the current results.
 In the race day window, **Export HTML** writes the table as a web page, with each sailor's name under
 their sail number. It goes in `output_folder` (see properties.xml), in the club's folder and the
 competition's HTML folder (`directory`), for example
-`~/Documents/Lakemark_output/RMBC/Victoria2026/Race_day_1.html`. Exporting
+`~/Documents/LakeMark_output/RMBC/Victoria2026/Race_day_1.html`. Exporting
 the same race day again replaces its page.
 
 In a results window, **Export HTML** writes that table as `results_current.html` or
@@ -191,12 +191,12 @@ It runs on the Linux version it was built on and newer ones, so build on the old
 
 A Linux program file carries no icon of its own: a launcher (`.desktop` file) gives it one. Copy
 `app/resources/lakemark.png` to `~/.local/share/icons/hicolor/256x256/apps/`, and put
-`Icon=lakemark` and `StartupWMClass=Lakemark` in the launcher, so the menu, the desktop and the
+`Icon=lakemark` and `StartupWMClass=LakeMark` in the launcher, so the menu, the desktop and the
 taskbar all show it.
 
-The build also makes a **portable copy** for a USB stick, `dist/Lakemark/`:
+The build also makes a **portable copy** for a USB stick, `dist/LakeMark/`:
 
-    Lakemark/
+    LakeMark/
         lakemark             the program
         output/              exported web pages: the only folder users need to open
         system/              the data folder (instead of ~/.lakemark), README.txt and
@@ -235,7 +235,7 @@ The .exe is not code-signed, so Windows may warn "Windows protected your PC": cl
 **Both at once, on GitHub**: push a version tag and GitHub builds both (on Ubuntu 22.04 and
 Windows), runs the tests on each, and publishes them as a release to download:
 
-    git tag -a v1.05 -m "Lakemark 1.05"
+    git tag -a v1.05 -m "LakeMark 1.05"
     git push origin v1.05
 
 See `.github/workflows/release.yml`. It can also be run by hand from the Actions tab to check
@@ -247,7 +247,7 @@ First commit and push the changes, and run the program once from the Run button 
 Then:
 
 1. **Make the tag.** Choose **Git > New Tag...**. Type the tag name, such as `v1.05` (`v` and
-   the version in `app/__init__.py`), and the message `Lakemark 1.05`. Leave Commit blank, so
+   the version in `app/__init__.py`), and the message `LakeMark 1.05`. Leave Commit blank, so
    the tag goes on the latest commit. Click **Create Tag**.
    (No New Tag in the Git menu? Open the Git tool window, bottom left, go to its **Log** tab,
    right-click the top commit and choose **New Tag...**.)
@@ -313,10 +313,10 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             sailors_window.py   the Club sailors window
             boat_classes_window.py  the Boat classes window
             sail_chooser.py     asks which sailor an ambiguous sail number means
-            app_icon.py         the Lakemark icon on every window
+            app_icon.py         the LakeMark icon on every window
         resources/
             help.txt            the text of Info > Help (keep it in step with this README)
-            lakemark.svg        Lakemark's icon; lakemark.png (the windows' icon) and lakemark.ico
+            lakemark.svg        LakeMark's icon; lakemark.png (the windows' icon) and lakemark.ico
                                 (the Windows program file's) are made from it by build_linux.sh
             club_logo.svg       RMBC's logo; club_logo.png is made from it by build_linux.sh, and
                                 given to the RMBC folder made from a pre-1.05 data folder

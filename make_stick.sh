@@ -4,7 +4,7 @@
 #     ./make_stick.sh /media/$USER/STICK                    data from ~/.lakemark
 #     ./make_stick.sh /media/$USER/STICK ~/other-data       data from another folder
 #
-# Makes STICK/Lakemark/ (see portable/README.txt):
+# Makes STICK/LakeMark/ (see portable/README.txt), renaming the Lakemark folder of an older stick:
 #
 #     lakemark             the program for Linux
 #     lakemark.exe         the program for Windows
@@ -31,11 +31,18 @@ if [ $# -lt 1 ] || [ $# -gt 2 ]; then
 fi
 stick="${1%/}"
 data="${2:-$HOME/.lakemark}"
-portable=dist/Lakemark
-target="$stick/Lakemark"
+portable=dist/LakeMark
+target="$stick/LakeMark"
 
 [ -d "$stick" ] && [ -w "$stick" ] || { echo "Cannot write to $stick: is the stick plugged in?" >&2; exit 1; }
 [ -d "$data" ] || { echo "No data folder $data" >&2; exit 1; }
+
+# Sticks made before version 1.10 have a Lakemark folder: rename it LakeMark, keeping its data.
+# FAT and exFAT sticks ignore case in names, so it goes by way of another name.
+if ls "$stick" | grep -qx Lakemark && ! ls "$stick" | grep -qx LakeMark; then
+    echo "Renaming $stick/Lakemark to LakeMark ..."
+    mv "$stick/Lakemark" "$stick/LakeMark.renaming" && mv "$stick/LakeMark.renaming" "$target"
+fi
 
 # Build if there is no program yet, or the code has changed since it was built.
 if [ ! -f "$portable/lakemark" ] ||

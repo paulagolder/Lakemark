@@ -67,7 +67,7 @@ class AboutWindow(tk.Toplevel):
         frame.pack(fill="both", expand=True)
         header = ttk.Frame(frame)
         header.grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 12))
-        # the club's logo, or Lakemark's icon with no club chosen; kept, or Tk forgets the picture
+        # the club's logo, or LakeMark's icon with no club chosen; kept, or Tk forgets the picture
         self._logo = load_logo(self, club.logo if club is not None else ICON_FILE)
         if self._logo is not None:
             ttk.Label(header, image=self._logo).pack(side="left", padx=(0, 12))

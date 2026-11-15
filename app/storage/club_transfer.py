@@ -80,7 +80,7 @@ def _club_files(archive: zipfile.ZipFile) -> tuple[str, list[zipfile.ZipInfo]]:
     abbreviation = folders.pop()
     if abbreviation_problem(abbreviation) or f"{abbreviation}/{abbreviation}Club.xml" not in {
             m.filename for m in members}:
-        raise StorageError(f"The zip file is not a club exported from Lakemark (no "
+        raise StorageError(f"The zip file is not a club exported from LakeMark (no "
                            f"{abbreviation}/{abbreviation}Club.xml in it).")
     return abbreviation, members
 

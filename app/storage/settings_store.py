@@ -7,14 +7,14 @@ model/club.py) and properties.xml, the settings for every club:
       <default_club>RMBC</default_club>
       <default_rows>5</default_rows>
       <default_columns>4</default_columns>
-      <output_folder>~/Documents/Lakemark_output</output_folder>
+      <output_folder>~/Documents/LakeMark_output</output_folder>
     </properties>
 
 default_club is the club chosen last time, which the program opens with (unless it is started
 with --club); blank, or a club no longer in the data folder: it opens with no club chosen.
 
 output_folder is where Export HTML writes, in a sub folder for the club and one for the
-competition (for example ~/Documents/Lakemark_output/RMBC/DF95_2026/). ~ and $VARIABLES are
+competition (for example ~/Documents/LakeMark_output/RMBC/DF95_2026/). ~ and $VARIABLES are
 expanded. A relative folder ("output") is in the folder that holds the data folder.
 
 Before version 1.05 properties.xml also had the club's <title>; it is now in the club's own
@@ -22,7 +22,7 @@ folder, and old_title reads it from an old file so it can be moved there.
 
 A portable copy (on a USB stick, say) keeps everything together:
 
-    Lakemark/
+    LakeMark/
         lakemark             the program
         output/              the exported web pages: the only folder a user needs
         system/              the data folder: properties.xml and a folder for each club
@@ -49,11 +49,12 @@ from .xml_file import parse_xml
 DATA_DIR = Path.home() / ".lakemark"
 OLD_DATA_DIR = Path.home() / ".pyraceresults"   # the data folder before version 1.04
 PROPERTIES_FILE = "properties.xml"
-DEFAULT_TITLE = "Lakemark"               # the program's windows, before a club is chosen
-DEFAULT_OUTPUT_FOLDER = "~/Documents/Lakemark_output"
+DEFAULT_TITLE = "LakeMark"               # the program's windows, before a club is chosen
+DEFAULT_OUTPUT_FOLDER = "~/Documents/LakeMark_output"
 # earlier defaults: nothing in the program sets the output folder, so a file holding one of these
 # was never given another, and gets the default of this version
-OLD_OUTPUT_FOLDERS = ("~/Documents/raceresult_output", "~/Documents/lakemark_output")
+OLD_OUTPUT_FOLDERS = ("~/Documents/raceresult_output", "~/Documents/lakemark_output",
+                      "~/Documents/Lakemark_output")
 SYSTEM_FOLDER = "system"                 # beside the program: a portable copy's data folder
 PORTABLE_OUTPUT_FOLDER = "output"        # beside the program, in a portable copy
 # RMBC's logo, made from club_logo.svg. Before 1.05 every copy showed it; now each club has
@@ -153,7 +154,7 @@ def old_title(data_dir) -> str:
         title = (parse_xml(Path(data_dir) / PROPERTIES_FILE).findtext("title") or "").strip()
     except (OSError, ET.ParseError):
         return ""
-    return "" if title in (DEFAULT_TITLE, "RC Yacht Race Tables") else title
+    return "" if title in (DEFAULT_TITLE, "Lakemark", "RC Yacht Race Tables") else title
 
 
 def load_settings(data_dir=DATA_DIR) -> Settings:

@@ -48,7 +48,7 @@ class SettingsTests(unittest.TestCase):
     def test_old_title(self):
         self.write("<properties><title> Rugeley Model Boat Club </title></properties>")
         self.assertEqual(old_title(self.dir), "Rugeley Model Boat Club")
-        for default in ("Lakemark", "RC Yacht Race Tables", ""):     # never set: no title
+        for default in ("LakeMark", "Lakemark", "RC Yacht Race Tables", ""):  # never set: no title
             self.write(f"<properties><title>{default}</title></properties>")
             self.assertEqual(old_title(self.dir), "")
         self.assertEqual(old_title(Path(self._tmp.name) / "missing"), "")
@@ -61,13 +61,14 @@ class SettingsTests(unittest.TestCase):
                          ("", DEFAULT_ROWS, MAX_RACES))
 
     def test_old_default_output_folders_get_the_new_one(self):
-        for old in ("~/Documents/raceresult_output", "~/Documents/lakemark_output"):
+        for old in ("~/Documents/raceresult_output", "~/Documents/lakemark_output",
+                    "~/Documents/Lakemark_output"):
             self.write(f"<properties><output_folder>{old}</output_folder></properties>")
-            self.assertEqual(load_settings(self.dir).output_folder, "~/Documents/Lakemark_output")
+            self.assertEqual(load_settings(self.dir).output_folder, "~/Documents/LakeMark_output")
 
     def test_output_folder(self):
         self.assertEqual(load_settings(self.dir).output_dir,
-                         Path.home() / "Documents" / "Lakemark_output")
+                         Path.home() / "Documents" / "LakeMark_output")
         absolute = Path(self._tmp.name) / "results"      # with its drive letter on Windows
         self.write(f"<properties><output_folder>{absolute}</output_folder></properties>")
         self.assertEqual(load_settings(self.dir).output_dir, absolute)
@@ -98,7 +99,7 @@ class SettingsTests(unittest.TestCase):
         self.assertFalse(new.exists())                                # load_settings makes it
 
     def test_portable_copy_uses_its_system_folder(self):
-        program = Path(self._tmp.name) / "Lakemark"
+        program = Path(self._tmp.name) / "LakeMark"
         self.assertEqual(find_data_dir(program), DATA_DIR)            # no system folder
         (program / SYSTEM_FOLDER).mkdir(parents=True)
         data_dir = find_data_dir(program)

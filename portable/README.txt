@@ -1,7 +1,7 @@
-Lakemark - portable copy
+LakeMark - portable copy
 ========================
 
-For whoever sets up or looks after the USB stick. The Lakemark folder holds everything
+For whoever sets up or looks after the USB stick. The LakeMark folder holds everything
 the program needs:
 
     lakemark             the program for Linux. Double-click it, or run it from a terminal.
@@ -13,7 +13,7 @@ the program needs:
                          alone; the program looks after it.
 
 Both programs use the same system and output folders, so the results are the same whichever
-computer you use. Keep them together: copy or back up the whole Lakemark folder.
+computer you use. Keep them together: copy or back up the whole LakeMark folder.
 
 The program opens with the club chosen last (File > Choose club changes club). To open a
 particular club, start it with the club's abbreviation:
@@ -29,7 +29,7 @@ If the program will not start on Linux
 --------------------------------------
 Some Linux systems do not let programs run straight from a USB stick. Open a terminal and run
 
-    bash /path/to/Lakemark/system/start-linux.sh
+    bash /path/to/LakeMark/system/start-linux.sh
 
 (drag start-linux.sh into the terminal window to type its path). It copies the program to a
 temporary folder, runs it from there with the data on the stick, and tidies up afterwards.

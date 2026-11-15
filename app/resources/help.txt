@@ -1,6 +1,6 @@
-# Lakemark help
+# LakeMark help
 
-Lakemark keeps race results for radio-controlled model yachts. It looks after one or more clubs, one at a time. Each club has its own sailors, boat classes, competitions, title and logo.
+LakeMark keeps race results for radio-controlled model yachts. It looks after one or more clubs, one at a time. Each club has its own sailors, boat classes, competitions, title and logo.
 
 # Getting started
 
@@ -8,7 +8,7 @@ Download the program file for your computer from the Releases page: the one endi
 
 Windows may warn "Windows protected your PC", because the program is not code-signed: click More info, then Run anyway.
 
-The window is headed Lakemark until you choose a club. Choose one with File > Choose club..., or make your first with File > New club...: an abbreviation (such as RMBC, 1 to 10 letters or digits) and a title. The club becomes the heading, with its logo, and the Club menu comes alive. Next time, the program opens with the club you chose last.
+The window is headed LakeMark until you choose a club. Choose one with File > Choose club..., or make your first with File > New club...: an abbreviation (such as RMBC, 1 to 10 letters or digits) and a title. The club becomes the heading, with its logo, and the Club menu comes alive. Next time, the program opens with the club you chose last.
 
 A new version never touches your data: your clubs, sailors and competitions stay in the .lakemark folder in your home folder (see Where things are kept).
 
@@ -64,7 +64,7 @@ Report gives a short text summary of the competition: race days, races, finishes
 
 # Web pages
 
-Export HTML (in a race day window or a results window) writes the table as a web page, with the club's title and logo, ready to email, upload or print. Pages go in the output folder (normally Documents/Lakemark_output), in a folder for the club and the competition. Exporting again replaces the page.
+Export HTML (in a race day window or a results window) writes the table as a web page, with the club's title and logo, ready to email, upload or print. Pages go in the output folder (normally Documents/LakeMark_output), in a folder for the club and the competition. Exporting again replaces the page.
 
 # Clubs
 
@@ -97,11 +97,11 @@ Once the club is handed over, only one person should go on entering its results,
 
 # On a USB stick
 
-A portable copy is a Lakemark folder holding the program (lakemark for Linux, lakemark.exe for Windows), an output folder (the web pages you export: the only folder you need to open) and a system folder (the program's own files: leave it alone). Both programs use the same folders, so the results are the same on either kind of computer. Keep them together, and close the program before unplugging the stick.
+A portable copy is a LakeMark folder holding the program (lakemark for Linux, lakemark.exe for Windows), an output folder (the web pages you export: the only folder you need to open) and a system folder (the program's own files: leave it alone). Both programs use the same folders, so the results are the same on either kind of computer. Keep them together, and close the program before unplugging the stick.
 
 If the program will not start from the stick on Linux, open a terminal and run
 
-    bash /path/to/Lakemark/system/start-linux.sh
+    bash /path/to/LakeMark/system/start-linux.sh
 
 In the Files app, if double-clicking opens the program as a document, right-click it and choose "Run as a Program".
 

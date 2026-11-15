@@ -1,6 +1,6 @@
 """about.py - what the Info menu shows: the version, the facts for About, and the help text.
 
-    version_text()                          'Lakemark 1.06 (4 November 2026)'
+    version_text()                          'LakeMark 1.06 (4 November 2026)'
     about_facts(settings, club)             [("Version", "1.06"), ("Released", ...), ...]
     help_text()                             the help, from resources/help.txt
 """
@@ -17,11 +17,11 @@ from ..model.club import Club
 from ..storage.competition_store import list_competitions
 from ..storage.settings_store import Settings
 
-NAME = "Lakemark"
+NAME = "LakeMark"
 HELP_FILE = Path(__file__).parent.parent / "resources" / "help.txt"
 
 ABOUT_TEXT = """\
-Lakemark keeps race results for radio-controlled model yachts: competitions
+LakeMark keeps race results for radio-controlled model yachts: competitions
 made of race days, each a small table of sail numbers, with the results so far
 and web pages to share them. Each club has a folder of its own, so one race
 manager can look after several clubs, and hand a club over to another.
@@ -35,7 +35,7 @@ def version_date() -> str:
 
 
 def version_text() -> str:
-    """'Lakemark 1.06 (4 November 2026)'."""
+    """'LakeMark 1.06 (4 November 2026)'."""
     return f"{NAME} {__version__} ({version_date()})"
 
 
@@ -72,7 +72,7 @@ def help_text() -> str:
     try:
         return HELP_FILE.read_text(encoding="utf-8")
     except OSError:
-        return "# Lakemark help\n\nThe help file is missing from the program.\n"
+        return "# LakeMark help\n\nThe help file is missing from the program.\n"
 
 
 def _tk_version() -> str:

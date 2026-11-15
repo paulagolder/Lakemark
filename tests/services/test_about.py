@@ -10,7 +10,7 @@ from app.storage.settings_store import Settings
 
 class AboutTests(unittest.TestCase):
     def test_version_text(self):
-        self.assertRegex(version_text(), rf"^Lakemark {__version__} \(\d{{1,2}} \w+ \d{{4}}\)$")
+        self.assertRegex(version_text(), rf"^LakeMark {__version__} \(\d{{1,2}} \w+ \d{{4}}\)$")
 
     def test_facts(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -44,7 +44,7 @@ class AboutTests(unittest.TestCase):
 
     def test_help(self):
         text = help_text()
-        self.assertTrue(text.startswith("# Lakemark help"))
+        self.assertTrue(text.startswith("# LakeMark help"))
         for heading in ("Competitions", "Race days", "Results", "Clubs", "Handing a club over"):
             self.assertIn(f"\n# {heading}\n", text)
 

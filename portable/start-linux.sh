@@ -2,7 +2,7 @@
 # Start the portable copy's program, for when it will not run straight from the USB stick
 # (a stick mounted "noexec", or one that has lost the file's permission to run).
 #
-#     bash Lakemark/system/start-linux.sh
+#     bash LakeMark/system/start-linux.sh
 #
 # Runs ../lakemark if it can; otherwise runs a copy from a temporary folder, with this
 # system folder as its data folder, and removes the copy when it closes.

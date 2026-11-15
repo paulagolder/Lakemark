@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build a single Linux program file, dist/lakemark, and a portable copy for a USB stick,
-# dist/Lakemark/ (see portable/README.txt).
+# dist/LakeMark/ (see portable/README.txt).
 #
 #     ./build_linux.sh
 #
@@ -24,7 +24,7 @@ if command -v convert >/dev/null && [ "$logo.svg" -nt "$logo.png" ]; then
     convert -background none -density 384 "$logo.svg" -trim +repage -resize x56 -depth 8 "$logo.png"
 fi
 
-# Lakemark's icon: the PNG (for the windows) and the .ico (the Windows program file's icon, used
+# LakeMark's icon: the PNG (for the windows) and the .ico (the Windows program file's icon, used
 # by build_windows.bat) are made from lakemark.svg when ImageMagick is installed; otherwise the
 # ones already in the project are used.
 icon=app/resources/lakemark
@@ -44,7 +44,7 @@ pyinstaller --noconfirm --clean --onefile --windowed \
 # The portable copy, for a USB stick: the program and output/ on top, the rest in system/.
 # system/ starts with no data; the program makes its settings there the first time it runs.
 echo "Making the portable copy..."
-portable=dist/Lakemark
+portable=dist/LakeMark
 rm -rf "$portable"
 mkdir -p "$portable/output" "$portable/system"
 cp dist/lakemark "$portable/"

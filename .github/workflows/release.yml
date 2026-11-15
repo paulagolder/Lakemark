@@ -2,7 +2,7 @@
 #
 # Runs when a version tag is pushed:
 #
-#     git tag -a v1.04 -m "Lakemark 1.04"
+#     git tag -a v1.04 -m "LakeMark 1.04"
 #     git push origin v1.02
 #
 # The tests run on both systems first; if they fail, nothing is published. The release (named
@@ -85,5 +85,5 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" files/* \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Lakemark ${GITHUB_REF_NAME#v}" \
+            --title "LakeMark ${GITHUB_REF_NAME#v}" \
             --notes "Download the file for your computer: **-linux** for Linux, **-windows.exe** for Windows. Your competitions and club sailors stay in the .lakemark folder in your home folder and are not touched by a new version."

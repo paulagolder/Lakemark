@@ -9,7 +9,7 @@ competition's name, classes and so on (and its file name to match the name); New
 file in the club's folder. Delete takes it off the list by renaming the file to .cxml.deleted,
 so it can be brought back.
 
-Until a club is chosen the window is headed Lakemark, with Lakemark's icon, and the Club menu
+Until a club is chosen the window is headed LakeMark, with LakeMark's icon, and the Club menu
 is greyed out. The File menu chooses a club from those in the data folder, makes a new club, or
 imports one from a zip file made by Export club; the club becomes the heading, with its logo,
 and is remembered (properties.xml) as the club to open with next time. Choosing another club
@@ -87,7 +87,7 @@ class FrontWindow(tk.Tk):
         self.club_button = self.club_menu.master             # greyed out until a club is chosen
         info_menu = self._menu_button(menubar, "Info", "right")
         info_menu.add_command(label="Help", accelerator="F1", command=self.show_help)
-        info_menu.add_command(label="About Lakemark", command=self.show_about)
+        info_menu.add_command(label="About LakeMark", command=self.show_about)
         self.bind("<Control-n>", lambda e: self.new_competition())
         self.bind("<F5>", lambda e: self.refresh())
         self.bind("<F1>", lambda e: self.show_help())
@@ -150,7 +150,7 @@ class FrontWindow(tk.Tk):
         self.tree.bind("<F2>", lambda e: self.edit_details())
 
     def _show_club(self) -> None:
-        """Show the club's title and logo (again, after they are changed), or Lakemark's while
+        """Show the club's title and logo (again, after they are changed), or LakeMark's while
         no club is chosen."""
         club = self.club
         if club is None:

@@ -4,7 +4,7 @@
 
 The club opened is the one asked for with --club, otherwise the club chosen last time
 (default_club in properties.xml). When that club is not in the data folder any more, or none
-has been chosen yet, the window opens with no club, headed Lakemark, to choose or make one.
+has been chosen yet, the window opens with no club, headed LakeMark, to choose or make one.
 When --club names a club that is not there yet, the program offers to make it, so a new club's
 launcher sets the club up the first time it is used.
 

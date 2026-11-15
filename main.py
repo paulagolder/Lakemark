@@ -53,7 +53,7 @@ class _VersionAction(argparse.Action):
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = _Parser(prog=PROGRAM, description="Lakemark: race results for RC yachts.")
+    parser = _Parser(prog=PROGRAM, description="LakeMark: race results for RC yachts.")
     parser.add_argument("-V", "--version", action=_VersionAction)
     parser.add_argument("--data", metavar="FOLDER", type=Path,
                         help="the data folder (default: a system folder beside the program, "
