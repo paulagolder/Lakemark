@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Put the portable copy on a USB stick, with the club's data:
 #
-#     ./make_stick.sh /media/$USER/STICK                    data from ~/.lakemark
-#     ./make_stick.sh /media/$USER/STICK ~/other-data       data from another folder
+#     ./make_stick.sh /run/media/$USER/STICK                data from ~/.lakemark
+#     ./make_stick.sh /run/media/$USER/STICK ~/other-data   data from another folder
 #
 # Makes STICK/LakeMark/ (see portable/README.txt), renaming the Lakemark folder of an older stick:
 #
@@ -34,7 +34,11 @@ data="${2:-$HOME/.lakemark}"
 portable=dist/LakeMark
 target="$stick/LakeMark"
 
-[ -d "$stick" ] && [ -w "$stick" ] || { echo "Cannot write to $stick: is the stick plugged in?" >&2; exit 1; }
+if ! [ -d "$stick" ] || ! [ -w "$stick" ]; then
+    echo "Cannot write to $stick: is the stick plugged in? The sticks plugged in now:" >&2
+    ls -d /run/media/"$USER"/* /media/"$USER"/* 2>/dev/null | sed 's/^/    /' >&2 || true
+    exit 1
+fi
 [ -d "$data" ] || { echo "No data folder $data" >&2; exit 1; }
 
 # Sticks made before version 1.10 have a Lakemark folder: rename it LakeMark, keeping its data.
