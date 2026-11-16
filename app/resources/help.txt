@@ -6,11 +6,13 @@ LakeMark keeps race results for radio-controlled model yachts. It looks after on
 
 Download the program file for your computer from the Releases page: the one ending -linux for Linux, or -windows.exe for Windows. It is a single file with nothing else to install. Copy it anywhere and run it.
 
+On Windows you can also install it from a LakeMark USB stick: double-click install-windows.bat in the stick's LakeMark folder (see On a USB stick).
+
 Windows may warn "Windows protected your PC", because the program is not code-signed: click More info, then Run anyway.
 
 The window is headed LakeMark until you choose a club. Choose one with File > Choose club..., or make your first with File > New club...: an abbreviation (such as RMBC, 1 to 10 letters or digits) and a title. The club becomes the heading, with its logo, and the Club menu comes alive. Next time, the program opens with the club you chose last.
 
-A new version never touches your data: your clubs, sailors and competitions stay in the .lakemark folder in your home folder (see Where things are kept).
+A new version never touches your data: your clubs, sailors and competitions stay in the LakeMark folder in your Documents folder (see Where things are kept).
 
 # Competitions
 
@@ -64,7 +66,7 @@ Report gives a short text summary of the competition: race days, races, finishes
 
 # Web pages
 
-Export HTML (in a race day window or a results window) writes the table as a web page, with the club's title and logo, ready to email, upload or print. Pages go in the output folder (normally Documents/LakeMark_output), in a folder for the club and the competition. Exporting again replaces the page.
+Export HTML (in a race day window or a results window) writes the table as a web page, with the club's title and logo, ready to email, upload or print. Pages go in the output folder (normally Documents/LakeMark/output), in a folder for the club and the competition. Exporting again replaces the page.
 
 # Clubs
 
@@ -105,8 +107,12 @@ If the program will not start from the stick on Linux, open a terminal and run
 
 In the Files app, if double-clicking opens the program as a document, right-click it and choose "Run as a Program".
 
+To install LakeMark on a Windows computer, double-click install-windows.bat in the stick's LakeMark folder. It makes a LakeMark folder in Documents, laid out like the one on the stick, and puts LakeMark on the desktop and in the Start menu. The first time, it copies the clubs from the stick; after that the computer keeps its own results, which no longer go onto the stick. Running it again from a stick with a newer version updates the program and leaves the computer's data alone. To move a club between the two, use Club > Export club and File > Import club.
+
 # Where things are kept
 
 Info > About shows this club's folder, the data folder and the output folder.
 
-Everything lives in the data folder, .lakemark in your home folder (or the system folder of a portable copy): the settings, and one folder for each club with its sailors, boat classes, logo and competitions. Each save keeps the previous version of a file beside it as .bak.
+Everything lives in the LakeMark folder in your Documents folder, laid out like a stick: the web pages you export in its output folder, and the program's own files in its system folder (the data folder): the settings, and one folder for each club with its sailors, boat classes, logo and competitions. A portable copy uses the system folder beside the program instead. Each save keeps the previous version of a file beside it as .bak.
+
+Before version 1.11 the data folder was .lakemark in your home folder: the first time a newer version starts, it moves it to Documents/LakeMark/system.

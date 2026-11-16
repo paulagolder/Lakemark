@@ -1,21 +1,22 @@
 """settings_store.py - the settings: the data folder and its properties.xml.
 
-The data folder is ~/.lakemark by default. It holds a folder for each club (see
-model/club.py) and properties.xml, the settings for every club:
+The data folder is Documents/LakeMark/system by default (the same layout as a portable copy,
+below). It holds a folder for each club (see model/club.py) and properties.xml, the settings for
+every club:
 
     <properties>
       <default_club>RMBC</default_club>
       <default_rows>5</default_rows>
       <default_columns>4</default_columns>
-      <output_folder>~/Documents/LakeMark_output</output_folder>
+      <output_folder>output</output_folder>
     </properties>
 
 default_club is the club chosen last time, which the program opens with (unless it is started
 with --club); blank, or a club no longer in the data folder: it opens with no club chosen.
 
 output_folder is where Export HTML writes, in a sub folder for the club and one for the
-competition (for example ~/Documents/LakeMark_output/RMBC/DF95_2026/). ~ and $VARIABLES are
-expanded. A relative folder ("output") is in the folder that holds the data folder.
+competition (for example Documents/LakeMark/output/RMBC/DF95_2026/). ~ and $VARIABLES are
+expanded. A relative folder ("output", the default) is in the folder that holds the data folder.
 
 Before version 1.05 properties.xml also had the club's <title>; it is now in the club's own
 folder, and old_title reads it from an old file so it can be moved there.
@@ -28,7 +29,12 @@ A portable copy (on a USB stick, say) keeps everything together:
         system/              the data folder: properties.xml and a folder for each club
 
 The program uses a system folder beside it as its data folder (find_data_dir), with the
-default output_folder "output".
+default output_folder "output". A copy installed from a stick (install-windows.bat) is the same
+folder in Documents, so it finds its data the same way; a program file anywhere else uses
+Documents/LakeMark/system, the same data.
+
+Before version 1.11 the data folder was ~/.lakemark, and before 1.04 ~/.pyraceresults:
+move_old_data_dir moves the old one the first time.
 
 The folder and file are created with these defaults the first time the program runs. A missing
 or unreadable value falls back to its default, and numbers are kept within the limits in
@@ -38,6 +44,8 @@ model/limits.py.
 from __future__ import annotations
 
 import os
+import shutil
+import sys
 # Files are only read through xml_file.parse_xml, which refuses XML bombs.
 import xml.etree.ElementTree as ET  # nosec B405
 from dataclasses import dataclass
@@ -46,15 +54,40 @@ from pathlib import Path
 from ..model.limits import DEFAULT_RACES, DEFAULT_ROWS, MAX_PLACES, MAX_RACES
 from .xml_file import parse_xml
 
-DATA_DIR = Path.home() / ".lakemark"
-OLD_DATA_DIR = Path.home() / ".pyraceresults"   # the data folder before version 1.04
+
+
+def documents_dir() -> Path:
+    """The user's Documents folder. On Windows it may have been moved (to OneDrive, say), so
+    ask Windows where it is."""
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            import uuid
+            folder_id = ctypes.create_string_buffer(            # FOLDERID_Documents
+                uuid.UUID("FDD39AD0-238F-46AF-ADB4-6C85480369C7").bytes_le, 16)
+            path = ctypes.c_wchar_p()
+            if ctypes.windll.shell32.SHGetKnownFolderPath(folder_id, 0, None,
+                                                         ctypes.byref(path)) == 0:
+                try:
+                    return Path(path.value)
+                finally:
+                    ctypes.windll.ole32.CoTaskMemFree(path)
+        except (OSError, AttributeError, ValueError):
+            pass
+    return Path.home() / "Documents"
+
+
+LAKEMARK_DIR = documents_dir() / "LakeMark"     # laid out like a portable copy
+DATA_DIR = LAKEMARK_DIR / "system"
+OLD_DATA_DIRS = (Path.home() / ".lakemark",      # the data folder before version 1.11
+                 Path.home() / ".pyraceresults")  # before version 1.04
 PROPERTIES_FILE = "properties.xml"
 DEFAULT_TITLE = "LakeMark"               # the program's windows, before a club is chosen
-DEFAULT_OUTPUT_FOLDER = "~/Documents/LakeMark_output"
+DEFAULT_OUTPUT_FOLDER = "~/Documents/LakeMark_output"   # for a data folder named with --data
 # earlier defaults: nothing in the program sets the output folder, so a file holding one of these
 # was never given another, and gets the default of this version
 OLD_OUTPUT_FOLDERS = ("~/Documents/raceresult_output", "~/Documents/lakemark_output",
-                      "~/Documents/Lakemark_output")
+                      "~/Documents/Lakemark_output", "~/Documents/LakeMark_output")
 SYSTEM_FOLDER = "system"                 # beside the program: a portable copy's data folder
 PORTABLE_OUTPUT_FOLDER = "output"        # beside the program, in a portable copy
 # RMBC's logo, made from club_logo.svg. Before 1.05 every copy showed it; now each club has
@@ -81,21 +114,27 @@ class Settings:
 
 
 def find_data_dir(program_dir) -> Path:
-    """The system folder beside the program if there is one (a portable copy), otherwise
-    ~/.lakemark."""
+    """The system folder beside the program if there is one (a portable or installed copy),
+    otherwise Documents/LakeMark/system."""
     system = Path(program_dir) / SYSTEM_FOLDER
     return system if system.is_dir() else DATA_DIR
 
 
-def move_old_data_dir(new: Path = DATA_DIR, old: Path = OLD_DATA_DIR) -> Path:
-    """Before version 1.04 (when the program was called pyraceresults) the data folder was
-    ~/.pyraceresults. Move it to ~/.lakemark the first time, so a user keeps their competitions
-    and sailors. Returns the folder to use: the old one if it cannot be moved."""
-    if not new.exists() and old.is_dir():
-        try:
-            old.rename(new)
-        except OSError:
-            return old
+def move_old_data_dir(new: Path = DATA_DIR, olds: tuple[Path, ...] = OLD_DATA_DIRS) -> Path:
+    """Before version 1.11 the data folder was ~/.lakemark (and before 1.04, when the program
+    was called pyraceresults, ~/.pyraceresults). Move the first one found to the new place the
+    first time, so a user keeps their clubs and competitions. Returns the folder to use: the old
+    one if it cannot be moved; the new one, and the old left alone, if both exist."""
+    if new.exists():
+        return new
+    for old in olds:
+        if old.is_dir():
+            try:
+                new.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(old), str(new))
+            except OSError:
+                return old
+            break
     return new
 
 

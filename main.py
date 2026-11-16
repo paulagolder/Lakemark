@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Start the program:
 
-    python main.py                   (opens the default club, in ~/.lakemark)
+    python main.py                   (opens the default club, in Documents/LakeMark/system)
     python main.py --club CwMBC      (opens that club instead: one launcher for each club)
     python main.py --version         (prints the version and its date)
     python main.py --data FOLDER     (uses FOLDER as the data folder instead)
 
-A portable copy has a system folder beside the program file, and uses that as its data folder
-(see storage/settings_store.py).
+A portable or installed copy has a system folder beside the program file, and uses that as its
+data folder (see storage/settings_store.py).
 
 The Windows program file has no console (it is built --windowed), so there --version and --help
 show their text in a message box instead of printing it.
@@ -57,7 +57,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("-V", "--version", action=_VersionAction)
     parser.add_argument("--data", metavar="FOLDER", type=Path,
                         help="the data folder (default: a system folder beside the program, "
-                             "otherwise ~/.lakemark)")
+                             "otherwise Documents/LakeMark/system)")
     parser.add_argument("--club", metavar="ABBREVIATION",
                         help="the club to open, such as RMBC or CwMBC (default: the club "
                              "chosen with Club > Open with ... when the program starts)")

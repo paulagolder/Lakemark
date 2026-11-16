@@ -11,8 +11,9 @@ checker for Python code (from the Python Code Quality Authority). Run it again a
 - It uses only Python's standard library: no third-party packages are installed or bundled.
 - It does not use the network: there is no `socket`, `urllib`, `requests` or `http` in the code.
   It does not run code it reads (`eval`, `exec`, `pickle`).
-- It reads and writes its XML files in `~/.lakemark`, and writes exported pages and reports
-  in the output folder (`properties.xml`, default `~/Documents/LakeMark_output`).
+- It reads and writes its XML files in its data folder (`Documents/LakeMark/system`, or the
+  `system` folder beside the program), and writes exported pages and reports in the output
+  folder (`properties.xml`, default `Documents/LakeMark/output`).
 - It makes a `.bak` copy of a file before replacing it (`app/storage/xml_file.py`).
 - **Club > club details > Choose picture...** copies the picture the user picks into the
   club's folder as its logo; only PNG and GIF files are accepted (`app/storage/club_store.py`).

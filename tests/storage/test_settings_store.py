@@ -5,6 +5,7 @@ from pathlib import Path
 from app.model.limits import DEFAULT_RACES, DEFAULT_ROWS, MAX_RACES
 from app.storage.settings_store import (
     DATA_DIR,
+    LAKEMARK_DIR,
     PROPERTIES_FILE,
     SYSTEM_FOLDER,
     find_data_dir,
@@ -19,7 +20,7 @@ class SettingsTests(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self._tmp.cleanup)
-        self.dir = Path(self._tmp.name) / ".lakemark"
+        self.dir = Path(self._tmp.name) / "data"         # a data folder named with --data
 
     def write(self, text: str) -> None:
         self.dir.mkdir(parents=True, exist_ok=True)
@@ -62,7 +63,7 @@ class SettingsTests(unittest.TestCase):
 
     def test_old_default_output_folders_get_the_new_one(self):
         for old in ("~/Documents/raceresult_output", "~/Documents/lakemark_output",
-                    "~/Documents/Lakemark_output"):
+                    "~/Documents/Lakemark_output", "~/Documents/LakeMark_output"):
             self.write(f"<properties><output_folder>{old}</output_folder></properties>")
             self.assertEqual(load_settings(self.dir).output_folder, "~/Documents/LakeMark_output")
 
@@ -78,25 +79,52 @@ class SettingsTests(unittest.TestCase):
         self.write("<properties><output_folder>results</output_folder></properties>")
         self.assertEqual(load_settings(self.dir).output_dir, self.dir.parent / "results")
 
+    def old_and_new(self) -> tuple[Path, Path, Path]:
+        home = Path(self._tmp.name)
+        return home / ".lakemark", home / ".pyraceresults", home / "Documents/LakeMark/system"
+
+    def test_default_data_folder_is_in_documents(self):
+        self.assertEqual(DATA_DIR, LAKEMARK_DIR / SYSTEM_FOLDER)
+        self.assertEqual(LAKEMARK_DIR.name, "LakeMark")
+        self.assertEqual(LAKEMARK_DIR.parent.name, "Documents")
+
     def test_moves_the_old_data_folder(self):
-        old, new = Path(self._tmp.name) / ".pyraceresults", Path(self._tmp.name) / ".lakemark"
-        old.mkdir()
-        (old / "DF95_2026.cxml").write_text("<competition/>", encoding="utf-8")
-        self.assertEqual(move_old_data_dir(new, old), new)
-        self.assertFalse(old.exists())
+        lakemark, pyraceresults, new = self.old_and_new()
+        (lakemark / "RMBC").mkdir(parents=True)
+        (lakemark / "RMBC" / "RMBCClub.xml").write_text("<club/>", encoding="utf-8")
+        self.assertEqual(move_old_data_dir(new, (lakemark, pyraceresults)), new)
+        self.assertFalse(lakemark.exists())
+        self.assertTrue((new / "RMBC" / "RMBCClub.xml").exists())
+
+    def test_moves_the_oldest_data_folder_if_it_is_the_only_one(self):
+        lakemark, pyraceresults, new = self.old_and_new()
+        pyraceresults.mkdir()
+        (pyraceresults / "DF95_2026.cxml").write_text("<competition/>", encoding="utf-8")
+        self.assertEqual(move_old_data_dir(new, (lakemark, pyraceresults)), new)
+        self.assertFalse(pyraceresults.exists())
         self.assertTrue((new / "DF95_2026.cxml").exists())
 
     def test_keeps_the_new_data_folder_if_both_exist(self):
-        old, new = Path(self._tmp.name) / ".pyraceresults", Path(self._tmp.name) / ".lakemark"
-        old.mkdir()
-        new.mkdir()
-        self.assertEqual(move_old_data_dir(new, old), new)
-        self.assertTrue(old.exists())                                 # left for the user to sort out
+        lakemark, pyraceresults, new = self.old_and_new()
+        lakemark.mkdir()
+        new.mkdir(parents=True)
+        self.assertEqual(move_old_data_dir(new, (lakemark, pyraceresults)), new)
+        self.assertTrue(lakemark.exists())                            # left for the user to sort out
 
     def test_no_old_data_folder(self):
-        new = Path(self._tmp.name) / ".lakemark"
-        self.assertEqual(move_old_data_dir(new, Path(self._tmp.name) / ".pyraceresults"), new)
+        lakemark, pyraceresults, new = self.old_and_new()
+        self.assertEqual(move_old_data_dir(new, (lakemark, pyraceresults)), new)
         self.assertFalse(new.exists())                                # load_settings makes it
+
+    def test_default_data_folder_exports_beside_it(self):
+        new = self.old_and_new()[2]
+        settings = load_settings(new)
+        self.assertEqual(settings.output_folder, "output")
+        self.assertEqual(settings.output_dir, new.parent / "output")  # Documents/LakeMark/output
+        (new / PROPERTIES_FILE).write_text(        # a properties.xml from 1.10, in ~/.lakemark
+            "<properties><output_folder>~/Documents/LakeMark_output</output_folder></properties>",
+            encoding="utf-8")
+        self.assertEqual(load_settings(new).output_dir, new.parent / "output")
 
     def test_portable_copy_uses_its_system_folder(self):
         program = Path(self._tmp.name) / "LakeMark"

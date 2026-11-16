@@ -6,6 +6,7 @@ the program needs:
 
     lakemark             the program for Linux. Double-click it, or run it from a terminal.
     lakemark.exe         the program for Windows. Double-click it.
+    install-windows.bat  installs LakeMark on a Windows computer: see below.
     output/              the web pages you export: results, race days, reports.
                          This is the only folder you need to open.
     system/              the program's own files: settings, and a folder for each club
@@ -24,6 +25,18 @@ Close the program before you unplug the USB stick.
 
 The first time on a Windows computer, Windows may say "Windows protected your PC", as the
 program is not code-signed: click More info, then Run anyway.
+
+Installing on a Windows computer
+--------------------------------
+Double-click install-windows.bat. It makes a LakeMark folder in Documents, laid out like this
+one, copies the program into it and puts LakeMark on the desktop and in the Start menu.
+
+The first time, it copies the clubs and settings from the stick. From then on the computer keeps
+its own results: what you enter there stays on the computer and does not go onto the stick. To
+move a club between the two, use Club > Export club and File > Import club.
+
+To update the program, run install-windows.bat again from a stick with the newer version: it
+replaces the program and leaves the computer's clubs and results alone.
 
 If the program will not start on Linux
 --------------------------------------

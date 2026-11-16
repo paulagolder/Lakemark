@@ -19,26 +19,31 @@ Race results for RC yachts: enter and edit race results for radio-controlled mod
 
 ## The data folder
 
-Everything lives in `~/.lakemark` (created on first run). Before version 1.04 the program was called
-pyraceresults and used `~/.pyraceresults`; the first run of 1.04 moves that folder to `~/.lakemark`.
+Everything lives in `~/Documents/LakeMark` (created on first run), laid out like the LakeMark
+folder on a USB stick: `output/` for exported web pages and `system/` as the data folder. On
+Windows it is the Documents folder Windows reports, which may be in OneDrive. Before version 1.11
+the data folder was `~/.lakemark`, and before 1.04 (when the program was called pyraceresults)
+`~/.pyraceresults`; the first run of a newer version moves it to `~/Documents/LakeMark/system`.
 
-    ~/.lakemark/
-        properties.xml          settings for every club
-        RMBC/                   one folder for each club, named by its abbreviation
-            RMBCClub.xml        the club's title
-            RMBCSail.xml        the club's sailors
-            RMBCClasses.xml     the club's boat classes
-            RMBCLogo.png        the club's logo (or .gif)
-            DF95_2026.cxml      the club's competitions
-            ...
-        CwMBC/
-            CwMBCClub.xml ...
+    ~/Documents/LakeMark/
+        output/                     exported web pages, a folder for each club
+        system/                     the data folder
+            properties.xml          settings for every club
+            RMBC/                   one folder for each club, named by its abbreviation
+                RMBCClub.xml        the club's title
+                RMBCSail.xml        the club's sailors
+                RMBCClasses.xml     the club's boat classes
+                RMBCLogo.png        the club's logo (or .gif)
+                DF95_2026.cxml      the club's competitions
+                ...
+            CwMBC/
+                CwMBCClub.xml ...
 
 - `properties.xml`: `default_club`, the club chosen last, which the program opens with; the default number of rows
   and columns for a new race day; and `output_folder`, where **Export HTML** writes (default
-  `~/Documents/LakeMark_output`; before version 1.10 it was `lakemark_output`, or
-  `raceresult_output` from the pyraceresults days, and a properties.xml naming one of those (or
-  `Lakemark_output`) now gets `LakeMark_output`), in a sub folder for each club.
+  `output`, beside the data folder; before version 1.11 it was `~/Documents/LakeMark_output`,
+  and earlier `lakemark_output` or `raceresult_output`, and a properties.xml naming one of those
+  now gets `output`), in a sub folder for each club.
 - `<club>Club.xml`: the club's title, shown at the top of the windows and on web pages. Change it,
   and the logo, with **Club > club details**.
 - `<club>Sail.xml`: the club sailors, one `<sail sailnumber="   01" boatclass="DF95" forename=".." surname=".." tag="PG" />` per boat (tag: see below). Edit it with the
@@ -113,9 +118,9 @@ are. **Copy** puts those facts on the clipboard, to send with a question.
 Needs Python 3.9 or newer with tkinter (included with the Windows and macOS installers from python.org;
 on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
-    python main.py                   # opens the default club, in ~/.lakemark
+    python main.py                   # opens the default club, in ~/Documents/LakeMark/system
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # LakeMark 1.10 (15 November 2026)
+    python main.py --version         # LakeMark 1.11 (16 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -162,7 +167,7 @@ each race day's figures and the leading boats in the current results.
 In the race day window, **Export HTML** writes the table as a web page, with each sailor's name under
 their sail number. It goes in `output_folder` (see properties.xml), in the club's folder and the
 competition's HTML folder (`directory`), for example
-`~/Documents/LakeMark_output/RMBC/Victoria2026/Race_day_1.html`. Exporting
+`~/Documents/LakeMark/output/RMBC/Victoria2026/Race_day_1.html`. Exporting
 the same race day again replaces its page.
 
 In a results window, **Export HTML** writes that table as `results_current.html` or
@@ -180,7 +185,7 @@ outside its own files and what the findings mean.
 
 Each is a single file with Python included, so it runs on computers without Python installed.
 Data is not part of the program: replacing it with a new build never touches anyone's
-`.lakemark` folder.
+data folder.
 
 **Linux** (on Linux):
 
@@ -198,13 +203,14 @@ The build also makes a **portable copy** for a USB stick, `dist/LakeMark/`:
 
     LakeMark/
         lakemark             the program
+        install-windows.bat  installs LakeMark on a Windows computer (below)
         output/              exported web pages: the only folder users need to open
-        system/              the data folder (instead of ~/.lakemark), README.txt and
-                             start-linux.sh
+        system/              the data folder (instead of ~/Documents/LakeMark/system),
+                             README.txt and start-linux.sh
 
 To make a stick, plug it in and run
 
-    ./make_stick.sh /media/$USER/STICK         # data from ~/.lakemark (or name another)
+    ./make_stick.sh /run/media/$USER/STICK     # data from ~/Documents/LakeMark/system (or name another)
 
 It also puts the Windows program on the stick as `lakemark.exe`, so one stick works on Linux and
 Windows with the same data. That cannot be built on Linux, so it is downloaded from this version's
@@ -223,6 +229,13 @@ folder to the stick and put `properties.xml` and the club folders (`RMBC/`, `CwM
 `system/`. `lakemark --club CwMBC` works from the stick too. If a stick will not let the program run,
 `bash system/start-linux.sh` runs a temporary copy of it with the stick's data. `--data FOLDER`
 picks any data folder by hand.
+
+**Installing on Windows from a stick**: `install-windows.bat`, beside `lakemark.exe` on the stick,
+makes `Documents\LakeMark` (the same layout: `lakemark.exe`, `output\`, `system\`) and puts
+LakeMark on the desktop and in the Start menu. A new installation gets the stick's clubs and
+settings; where the computer already has a `system\properties.xml`, only the program is replaced.
+It saves downloading the program, which browsers and Windows often block, as it is not
+code-signed (and a program copied from a stick carries no "downloaded from the internet" mark).
 
 **Windows** (on Windows, with Python from python.org):
 

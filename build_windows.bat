@@ -8,8 +8,8 @@ rem "Add python.exe to PATH"; tkinter is included) and PyInstaller:
 rem
 rem     py -m pip install pyinstaller
 rem
-rem Data is not part of the program: each user's competitions stay in
-rem C:\Users\<name>\.lakemark.
+rem Data is not part of the program: each user's competitions stay in Documents\LakeMark\system
+rem (or in the system folder beside the program, on a stick or installed by install-windows.bat).
 
 setlocal
 cd /d "%~dp0"

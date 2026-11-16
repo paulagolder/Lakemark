@@ -6,8 +6,8 @@
 #
 # Needs PyInstaller (pipx install pyinstaller) and tkinter (sudo apt install python3-tk).
 # The program runs on this Linux version and newer ones, so build on the oldest you need.
-# Data is not part of the program: each user's competitions stay in ~/.lakemark, or in
-# the portable copy's system folder.
+# Data is not part of the program: each user's competitions stay in Documents/LakeMark/system,
+# or in the portable copy's system folder.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -47,7 +47,7 @@ echo "Making the portable copy..."
 portable=dist/LakeMark
 rm -rf "$portable"
 mkdir -p "$portable/output" "$portable/system"
-cp dist/lakemark "$portable/"
+cp dist/lakemark portable/install-windows.bat "$portable/"
 cp portable/README.txt portable/start-linux.sh "$portable/system/"
 
 echo

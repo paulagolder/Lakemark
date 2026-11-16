@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Put the portable copy on a USB stick, with the club's data:
 #
-#     ./make_stick.sh /run/media/$USER/STICK                data from ~/.lakemark
+#     ./make_stick.sh /run/media/$USER/STICK                data from ~/Documents/LakeMark/system
 #     ./make_stick.sh /run/media/$USER/STICK ~/other-data   data from another folder
 #
 # Makes STICK/LakeMark/ (see portable/README.txt), renaming the Lakemark folder of an older stick:
 #
 #     lakemark             the program for Linux
 #     lakemark.exe         the program for Windows
+#     install-windows.bat  installs LakeMark on a Windows computer, in Documents\LakeMark
 #     output/              exported web pages
 #     system/              settings, and a folder for each club (sailors, classes, competitions)
 #
@@ -30,7 +31,9 @@ if [ $# -lt 1 ] || [ $# -gt 2 ]; then
     exit 2
 fi
 stick="${1%/}"
-data="${2:-$HOME/.lakemark}"
+data="${2:-$HOME/Documents/LakeMark/system}"
+# Before version 1.11 the data folder was ~/.lakemark (the program moves it the first time it runs).
+[ $# -lt 2 ] && [ ! -d "$data" ] && [ -d "$HOME/.lakemark" ] && data="$HOME/.lakemark"
 portable=dist/LakeMark
 target="$stick/LakeMark"
 
@@ -57,7 +60,7 @@ fi
 
 echo "Putting the program on $target ..."
 mkdir -p "$target/output" "$target/system"
-cp "$portable/lakemark" "$target/"
+cp "$portable/lakemark" "$portable/install-windows.bat" "$target/"
 cp "$portable/system/README.txt" "$portable/system/start-linux.sh" "$target/system/"
 
 # The Windows program, from this version's GitHub release.
@@ -75,7 +78,8 @@ if [ ! -s "$windows" ]; then
 fi
 if [ -s "$windows" ]; then
     cp "$windows" "$target/lakemark.exe"
-    windows_note="Windows: double-click lakemark.exe."
+    windows_note="Windows: double-click lakemark.exe, or install-windows.bat to install LakeMark
+on that computer (in Documents\\LakeMark, with a desktop shortcut)."
 else
     windows_note="No Windows program: version $version is not released on GitHub yet (tag v$version
 and push it), or there is no internet. Run this again once it is."
