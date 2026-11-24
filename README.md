@@ -376,3 +376,9 @@ have a single `class="DF95"` and no name (the name becomes "DF95 2026"); version
 day as a table of `<columns>` and `<row>`s.
 
 Each save keeps the previous version beside it as `DF95_2026.cxml.bak`.
+
+## Licence
+
+LakeMark is free software under the MIT licence (see `LICENSE`): use it, copy it and change it as
+you like, keeping the copyright notice. It comes with no warranty. The photograph on the home page
+(`docs/images/banner.jpg`) is © Paul Golder and is not covered by the licence.
