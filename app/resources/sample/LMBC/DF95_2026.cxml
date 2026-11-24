@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<competition year="2026" name="DF95 2026" racecount="4" directory="DF95_2026" classes="df95" version="3">
+  <raceday name="Race Day 10-05-2026" date="2026-05-10" version="1" saved="2026-06-14T17:30">
+    <race name="Race A">
+      <sail>7</sail>
+      <sail>23</sail>
+      <sail>11</sail>
+      <sail>42</sail>
+      <sail>31</sail>
+      <sail>17</sail>
+    </race>
+    <race name="Race B">
+      <sail>11</sail>
+      <sail>7</sail>
+      <sail>17</sail>
+      <sail>23</sail>
+      <sail>42</sail>
+      <sail>31</sail>
+    </race>
+    <race name="Race C">
+      <sail>23</sail>
+      <sail>11</sail>
+      <sail>7</sail>
+      <sail>31</sail>
+      <sail>17</sail>
+      <sail>42</sail>
+    </race>
+  </raceday>
+  <raceday name="Race Day 14-06-2026" date="2026-06-14" version="1" saved="2026-06-14T17:30">
+    <race name="Race A">
+      <sail>11</sail>
+      <sail>7</sail>
+      <sail>31</sail>
+      <sail>23</sail>
+      <sail>17</sail>
+    </race>
+    <race name="Race B">
+      <sail>23</sail>
+      <sail>11</sail>
+      <sail>7</sail>
+      <sail>31</sail>
+      <sail>17</sail>
+    </race>
+    <race name="Race C">
+      <sail>7</sail>
+      <sail>23</sail>
+      <sail>17</sail>
+      <sail>11</sail>
+      <sail>31</sail>
+    </race>
+  </raceday>
+</competition>

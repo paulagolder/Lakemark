@@ -16,3 +16,5 @@ venv/
 *.tmp
 *.cxml
 *.cxml.deleted
+# ...but not the sample club's competition, given to a new installation
+!app/resources/sample/**/*.cxml
