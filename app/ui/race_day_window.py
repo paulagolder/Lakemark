@@ -16,7 +16,6 @@ from as the cursor leaves the cell, and is tagged to say which ("12/PAG", "12@")
 
 from __future__ import annotations
 
-import csv
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
@@ -27,6 +26,7 @@ from ..model.race_day import RaceDay, dated_name, format_date, is_dated_name, pa
 from ..model.sail_entry import Problem, SailResolver
 from ..services.html_export import export_race_day_html
 from ..storage.errors import StorageError
+from ..storage.race_day_csv import RaceDayFile, write_race_day_csv
 from .browser import open_in_browser
 from .grid_navigation import next_cell_position, previous_cell_position
 from .sail_chooser import SailChooser
@@ -46,13 +46,15 @@ class RaceDayWindow(tk.Toplevel):
     def __init__(self, parent: tk.Tk | tk.Toplevel, race_day: RaceDay, title: str = "Edit race day",
                  default_rows: int = DEFAULT_ROWS, resolver: SailResolver | None = None,
                  html_folder: Path | None = None, competition_title: str = "",
-                 club_title: str = "", logo: Path | None = None):
+                 club_title: str = "", logo: Path | None = None, club: str = "",
+                 csv_folder: Path | None = None):
         super().__init__(parent)
         self._parent = parent
         self.title(title)
         self.resizable(False, False)
         self.transient(parent)
         self.result: RaceDay | None = None
+        self.race_day = race_day                    # as opened: what Export CSV writes
         self.resolver = resolver                    # None: sail numbers are not checked
         self.members = resolver.members if resolver is not None else None
         self.classes = resolver.class_names if resolver is not None else []
@@ -60,6 +62,8 @@ class RaceDayWindow(tk.Toplevel):
         self.competition_title = competition_title
         self.club_title = club_title
         self.logo = logo                            # the club's logo, for Export HTML
+        self.club = club                            # its abbreviation, for Export CSV's heading
+        self.csv_folder = csv_folder                # where Export CSV offers to save (None: anywhere)
         ttk.Style(self).configure(BAD_STYLE, fieldbackground="#f6c6c6", foreground="#9c0000")
 
         self.columns: list[str] = list(race_day.columns)    # race names
@@ -335,20 +339,33 @@ class RaceDayWindow(tk.Toplevel):
         self._focus_cell(0, 0)
 
     def _export_csv(self) -> None:
+        """Save the race day as a CSV file, headed with the club, competition, classes, race day,
+        date and version, for Import CSV in another copy of the competition (or a spreadsheet).
+        It is the race day as saved, with its version: changes not yet saved must be saved first."""
+        day = self.race_day
+        if self._snapshot() != self._initial or not day.version:
+            messagebox.showinfo(
+                "Export CSV", "Save the race day first: Export CSV exports the race day as saved, "
+                "with its version number. Click Save, then open it again with Edit.", parent=self)
+            return
+        folder = self.csv_folder
+        if folder is not None:
+            try:
+                folder.mkdir(parents=True, exist_ok=True)
+            except OSError:
+                folder = None                            # the dialog starts where it likes
         path = filedialog.asksaveasfilename(
             parent=self, defaultextension=".csv", filetypes=[("CSV files", "*.csv")],
-            initialfile=f"{self.name_var.get().strip() or 'race_day'}.csv")
+            initialdir=str(folder) if folder is not None else None,
+            initialfile=f"{day.name}.csv")
         if not path:
             return
         try:
-            with open(path, "w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow(["Row", *self.columns])
-                for i, row in enumerate(_without_trailing_blank_rows(self._values()), start=1):
-                    writer.writerow([i, *row])
-        except OSError as exc:
-            messagebox.showerror("Export CSV", f"Could not write the file: {exc.strerror or exc}",
-                                 parent=self)
+            write_race_day_csv(path, RaceDayFile(
+                day, club=self.club, club_title=self.club_title,
+                competition=self.competition_title, classes=list(self.classes)))
+        except StorageError as exc:
+            messagebox.showerror("Export CSV", str(exc), parent=self)
             return
         messagebox.showinfo("Export CSV", f"Saved to {path}", parent=self)
 

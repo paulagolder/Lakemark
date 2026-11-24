@@ -33,6 +33,27 @@ class SessionTests(unittest.TestCase):
         self.assertTrue(self.path.exists())
         self.assertEqual(self.on_disk(), df95())
 
+    def test_race_day_versions(self):
+        self.session.add_race_day(day("Day 1", ["A"], [["x"]]))
+        self.assertEqual(self.on_disk().race_days[0].version, 1)
+        self.session.update_race_day(0, day("Day 1", ["A"], [["x"]]))          # no change
+        self.assertEqual(self.on_disk().race_days[0].version, 1)
+        self.session.update_race_day(0, day("Day 1", ["A"], [["y"]]))
+        self.assertEqual(self.on_disk().race_days[0].version, 2)
+        self.assertIsNotNone(self.on_disk().race_days[0].saved)
+
+    def test_imported_race_day_keeps_the_files_version(self):
+        imported = day("Day 1", ["A"], [["x"]])
+        imported.version = 5
+        self.session.add_race_day(day("Day 1", ["A"], [["x"]]), based_on=imported)
+        self.assertEqual(self.on_disk().race_days[0].version, 5)
+        newer = day("Day 1", ["A"], [["y"]])
+        newer.version = 7
+        self.session.update_race_day(0, day("Day 1", ["A"], [["y"]]), based_on=newer)
+        self.assertEqual(self.on_disk().race_days[0].version, 7)
+        self.session.update_race_day(0, day("Day 1", ["A"], [["z"]]), based_on=newer)   # changed
+        self.assertEqual(self.on_disk().race_days[0].version, 8)
+
     def test_open_existing(self):
         self.session.add_race_day(day("Day 1", ["A"], [["x"]]))
         reopened = CompetitionSession.open(self.path)

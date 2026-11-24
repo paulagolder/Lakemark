@@ -160,6 +160,23 @@ class StorageTests(unittest.TestCase):
         self.assertEqual([d.date for d in load_competition(self.path).race_days],
                          [datetime.date(2026, 10, 10), None])
 
+    def test_race_day_version(self):
+        comp = simple("DF95", 2026)
+        comp.add_race_day(RaceDay("Saved", version=4, saved=datetime.datetime(2026, 11, 20, 18, 2)))
+        comp.add_race_day(RaceDay("Before versions"))
+        save_competition(comp, self.path)
+        text = self.path.read_text(encoding="utf-8")
+        self.assertIn('<raceday name="Saved" version="4" saved="2026-11-20T18:02">', text)
+        self.assertIn('<raceday name="Before versions">', text)
+        self.assertEqual([(d.version, d.saved) for d in load_competition(self.path).race_days],
+                         [(4, datetime.datetime(2026, 11, 20, 18, 2)), (0, None)])
+
+    def test_bad_race_day_version_is_version_0(self):
+        xml = ('<competition year="2026" name="x" classes="df65"><raceday name="d" version="x" '
+               'saved="soon"><race name="A"/></raceday></competition>')
+        day = load_competition(self.write(xml)).race_days[0]
+        self.assertEqual((day.version, day.saved), (0, None))
+
     def test_bad_race_day_date_is_refused(self):
         xml = ('<competition year="2026" name="x" classes="df65"><raceday name="d" date="10/10/2026">'
                '<race name="A"/></raceday></competition>')

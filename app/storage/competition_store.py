@@ -5,7 +5,7 @@ sail numbers of its finishers in finishing order (the first <sail> came 1st):
 
     <competition year="2026" name="Victoria_df65_competition_2026" racecount="24"
                  directory="Victoria2026" classes="df65,victoria" version="3">
-      <raceday name="Race day 1" date="2026-10-10">
+      <raceday name="Race day 1" date="2026-10-10" version="4" saved="2026-10-12T18:02">
         <race name="Race A">
           <sail>12</sail>
           <sail>7</sail>
@@ -22,7 +22,9 @@ to one made from the name. Every race day is open to all the competition's class
 clubs="..." from before version 1.05 (when a competition could limit which clubs' sailors
 raced) is ignored: a competition is in its club's folder, and its sailors are that club's.
 
-A race day's date is year-month-day, and may be left out (not known).
+A race day's date is year-month-day, and may be left out (not known). version counts the saves
+that changed it and saved is when the last was (see model/race_day.py); both are left out of a
+race day saved before they were kept (version 0).
 
 An empty <sail/> is a place left empty; the sails after it keep their places. A new
 competition has no race days yet, and a new race has no sails.
@@ -71,6 +73,10 @@ def competition_to_xml(comp: Competition) -> ET.Element:
         day_attributes = {"name": _clean(day.name)}
         if day.date:
             day_attributes["date"] = day.date.isoformat()
+        if day.version:
+            day_attributes["version"] = str(day.version)
+        if day.saved:
+            day_attributes["saved"] = day.saved.isoformat(timespec="minutes")
         day_el = ET.SubElement(root, "raceday", day_attributes)
         for race in day.races:
             race_el = ET.SubElement(day_el, "race", {"name": _clean(race.name)})
@@ -94,6 +100,7 @@ def competition_from_xml(root: ET.Element) -> Competition:
             else:
                 day = _race_day_from_xml(name, day_el, index)
             day.date = _date(day_el.get("date"))
+            day.version, day.saved = _version(day_el.get("version")), _saved(day_el.get("saved"))
             comp.add_race_day(day)
         except ValueError as exc:
             raise StorageError(f"Race day {index}: {exc}") from exc
@@ -127,6 +134,20 @@ def _competition_details(root: ET.Element) -> Competition:
         return Competition(name, year, classes, race_count, root.get("directory", ""))
     except ValueError as exc:
         raise StorageError(str(exc)) from exc
+
+
+def _version(text: str | None) -> int:
+    """A race day's version="4"; missing, blank or not a number: 0."""
+    text = (text or "").strip()
+    return int(text) if text.isdigit() else 0
+
+
+def _saved(text: str | None) -> datetime.datetime | None:
+    """A race day's saved="2026-10-12T18:02"; missing or not a date and time: None."""
+    try:
+        return datetime.datetime.fromisoformat((text or "").strip())
+    except ValueError:
+        return None
 
 
 def _date(text: str | None) -> datetime.date | None:

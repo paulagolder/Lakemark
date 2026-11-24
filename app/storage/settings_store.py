@@ -57,14 +57,26 @@ from .xml_file import parse_xml
 
 
 def documents_dir() -> Path:
-    """The user's Documents folder. On Windows it may have been moved (to OneDrive, say), so
-    ask Windows where it is."""
+    """The user's Documents folder (see _user_folder)."""
+    return _user_folder("FDD39AD0-238F-46AF-ADB4-6C85480369C7", "DOCUMENTS", "Documents")
+
+
+def downloads_dir() -> Path:
+    """The user's Downloads folder (see _user_folder), or the home folder if there is none."""
+    folder = _user_folder("374DE290-123F-4565-9164-39C4925E467B", "DOWNLOAD", "Downloads")
+    return folder if folder.is_dir() else Path.home()
+
+
+def _user_folder(windows_id: str, xdg_name: str, default: str) -> Path:
+    """One of the user's own folders. Windows lets it be moved (to OneDrive, say), so ask Windows
+    where it is (windows_id: its FOLDERID). A Linux desktop may give it a name in the user's
+    language (~/Téléchargements), kept in ~/.config/user-dirs.dirs as XDG_<xdg_name>_DIR. Otherwise,
+    and on macOS, it is ~/<default>."""
     if sys.platform == "win32":
         try:
             import ctypes
             import uuid
-            folder_id = ctypes.create_string_buffer(            # FOLDERID_Documents
-                uuid.UUID("FDD39AD0-238F-46AF-ADB4-6C85480369C7").bytes_le, 16)
+            folder_id = ctypes.create_string_buffer(uuid.UUID(windows_id).bytes_le, 16)
             path = ctypes.c_wchar_p()
             if ctypes.windll.shell32.SHGetKnownFolderPath(folder_id, 0, None,
                                                          ctypes.byref(path)) == 0:
@@ -74,7 +86,28 @@ def documents_dir() -> Path:
                     ctypes.windll.ole32.CoTaskMemFree(path)
         except (OSError, AttributeError, ValueError):
             pass
-    return Path.home() / "Documents"
+    elif sys.platform != "darwin":
+        folder = _xdg_user_dir(xdg_name)
+        if folder is not None:
+            return folder
+    return Path.home() / default
+
+
+def _xdg_user_dir(name: str) -> Path | None:
+    """XDG_<name>_DIR="$HOME/Downloads" from ~/.config/user-dirs.dirs, or None."""
+    config = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+    try:
+        lines = (config / "user-dirs.dirs").read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError):
+        return None
+    for line in lines:
+        key, _, value = line.partition("=")
+        if key.strip() == f"XDG_{name}_DIR":
+            value = value.strip().strip('"').replace("$HOME", str(Path.home()))
+            folder = Path(value)
+            # "$HOME/" means the setting is off: the home folder itself is not the folder
+            return folder if folder.is_absolute() and folder != Path.home() else None
+    return None
 
 
 LAKEMARK_DIR = documents_dir() / "LakeMark"     # laid out like a portable copy

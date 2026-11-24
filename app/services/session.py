@@ -12,6 +12,7 @@ error is raised, so what is on screen never differs from what is in the file.
 
 from __future__ import annotations
 
+import datetime
 from pathlib import Path
 
 from ..model.boat_class import DEFAULT_BOAT_CLASSES, BoatClass, BoatClassList
@@ -63,8 +64,12 @@ class CompetitionSession:
 
     # -- changes (each one is saved immediately) -----------------------------------------
 
-    def add_race_day(self, day: RaceDay) -> int:
-        """Add a race day and return its index. Raises ValueError or StorageError (nothing changed)."""
+    def add_race_day(self, day: RaceDay, based_on: RaceDay | None = None) -> int:
+        """Add a race day and return its index. Raises ValueError or StorageError (nothing changed).
+
+        It is version 1, or, made from based_on (an imported race day), based_on's version if it
+        has not been changed, otherwise the one after."""
+        day.stamped(based_on, datetime.datetime.now())
         index = self.competition.add_race_day(day)
         try:
             self._save()
@@ -73,9 +78,14 @@ class CompetitionSession:
             raise
         return index
 
-    def update_race_day(self, index: int, day: RaceDay) -> None:
-        """Replace a race day. Raises StorageError (nothing changed)."""
+    def update_race_day(self, index: int, day: RaceDay, based_on: RaceDay | None = None) -> None:
+        """Replace a race day. Raises StorageError (nothing changed).
+
+        Edited, it keeps its version if nothing has changed, otherwise it gets the next version.
+        based_on: what it was made from instead (a newer copy, imported), whose version it keeps
+        or follows in the same way."""
         old = self.competition.race_days[index]
+        day.stamped(based_on if based_on is not None else old, datetime.datetime.now())
         self.competition.replace_race_day(index, day)
         try:
             self._save()

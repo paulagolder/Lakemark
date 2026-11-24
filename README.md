@@ -120,7 +120,7 @@ on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
     python main.py                   # opens the default club, in ~/Documents/LakeMark/system
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # LakeMark 1.11 (16 November 2026)
+    python main.py --version         # LakeMark 1.12 (24 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
@@ -301,6 +301,7 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             competition_store.py  competition (.cxml) files
             club_store.py       the club folders: finding, making, title and logo; moving pre-1.05 files
             club_transfer.py    a club as a zip file: Export club and Import club
+            race_day_csv.py     a race day as a CSV file, with a heading: Export CSV and Import CSV
             member_store.py     a club's sailors, RMBCSail.xml
             boat_class_store.py a club's boat classes, RMBCClasses.xml
             settings_store.py   Settings: the data folder and properties.xml
@@ -310,6 +311,7 @@ there are 15, then moving to the top of the next column); **Shift+Tab** or **Up*
             results_table.py    the columns and scoring note shared by the results window and page
             html_export.py      a race day, or the results, as a web page
             report.py           the text summary of a competition (Report)
+            race_day_import.py  Import CSV: add a race day, replace it with a later version, or refuse it
             about.py            the version, the facts Info > About shows, and the help text
         ui/                     the windows
             start.py            which club to open (--club, the default, or a new one), then its window

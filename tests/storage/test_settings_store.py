@@ -1,6 +1,9 @@
+import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from app.model.limits import DEFAULT_RACES, DEFAULT_ROWS, MAX_RACES
 from app.storage.settings_store import (
@@ -8,6 +11,7 @@ from app.storage.settings_store import (
     LAKEMARK_DIR,
     PROPERTIES_FILE,
     SYSTEM_FOLDER,
+    downloads_dir,
     find_data_dir,
     load_settings,
     move_old_data_dir,
@@ -137,6 +141,24 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.output_dir, program / "output")      # beside the program
         self.assertIn("<output_folder>output</output_folder>",
                       (data_dir / PROPERTIES_FILE).read_text(encoding="utf-8"))
+
+    @unittest.skipIf(sys.platform in ("win32", "darwin"), "Linux desktops name the folders")
+    def test_downloads_folder_named_by_the_desktop(self):
+        config, home = Path(self._tmp.name) / "config", Path(self._tmp.name) / "home"
+        (home / "Téléchargements").mkdir(parents=True)
+        config.mkdir()
+        (config / "user-dirs.dirs").write_text(
+            '# written by xdg-user-dirs-update\nXDG_DOWNLOAD_DIR="$HOME/Téléchargements"\n',
+            encoding="utf-8")
+        with mock.patch.dict(os.environ, {"XDG_CONFIG_HOME": str(config)}), \
+                mock.patch.object(Path, "home", return_value=home):
+            self.assertEqual(downloads_dir(), home / "Téléchargements")
+            (config / "user-dirs.dirs").write_text('XDG_DOWNLOAD_DIR="$HOME/"\n', encoding="utf-8")
+            self.assertEqual(downloads_dir(), home)          # turned off, and no ~/Downloads
+            (home / "Downloads").mkdir()
+            self.assertEqual(downloads_dir(), home / "Downloads")
+            (config / "user-dirs.dirs").unlink()
+            self.assertEqual(downloads_dir(), home / "Downloads")
 
     def test_broken_file_uses_defaults(self):
         self.write("<properties><default_rows>")

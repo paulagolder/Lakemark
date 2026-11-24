@@ -2,8 +2,9 @@
 
     CompetitionWindow(parent, session, settings, club, on_close=...)
 
-Pick a race day from the list, and enter or edit its results. Every change is saved to the
-competition file as soon as the race day window is saved. The Results button offers the
+Pick a race day from the list, and enter or edit its results; clicking the selected race day
+again unselects it, leaving none selected. Every change is saved to the competition file as
+soon as the race day window is saved. The Results button offers the
 current results (every boat, by average points per race) and the final results (only boats
 that have sailed the competition's races counted, by points; needs races counted to be set),
 and exports either as an abridged web page: the totals only, without the race days.
@@ -14,7 +15,7 @@ from __future__ import annotations
 
 import datetime
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import filedialog, messagebox, ttk
 from typing import Callable
 
 from ..model.club import Club
@@ -22,12 +23,14 @@ from ..model.limits import MAX_RACE_DAYS
 from ..model.member_list import MemberList
 from ..model.race_day import RaceDay, default_races
 from ..services.html_export import export_results_html
+from ..services.race_day_import import ImportRefused, plan_import, source_text
 from ..services.report import competition_summary, summary_text
 from ..services.scoring import competition_results, current_results, final_results
 from ..services.session import CompetitionSession
 from ..storage.errors import StorageError
 from ..storage.member_store import load_members
-from ..storage.settings_store import Settings
+from ..storage.race_day_csv import read_race_day_csv
+from ..storage.settings_store import Settings, downloads_dir
 from .browser import open_in_browser
 from .race_day_window import RaceDayWindow
 from .report_window import ReportWindow
@@ -96,7 +99,8 @@ class CompetitionWindow(tk.Toplevel):
                                   exportselection=False, activestyle="none")
         self.listbox.pack(fill="y", expand=True)
         self.listbox.bind("<<ListboxSelect>>", lambda e: self._selection_changed())
-        self.listbox.bind("<Double-Button-1>", self.edit_race_day)
+        self.listbox.bind("<Button-1>", self._click)
+        self.listbox.bind("<Double-Button-1>", self._double_click)
         self.listbox.bind("<Return>", self.edit_race_day)
 
         buttons = ttk.Frame(self.days_frame)
@@ -104,6 +108,8 @@ class CompetitionWindow(tk.Toplevel):
         self.new_button = ttk.Button(buttons, text="New", width=8, command=self.new_race_day)
         self.edit_button = ttk.Button(buttons, text="Edit", width=8, command=self.edit_race_day)
         self.delete_button = ttk.Button(buttons, text="Delete", width=8, command=self.delete_race_day)
+        # in place of Edit and Delete while no race day is selected
+        self.import_button = ttk.Button(buttons, text="Import CSV", command=self.import_race_day)
         for button in (self.new_button, self.edit_button, self.delete_button):
             button.pack(side="left", padx=2)
 
@@ -117,6 +123,34 @@ class CompetitionWindow(tk.Toplevel):
         self.preview.pack(side="left", fill="both", expand=True)
 
     # -- refreshing what is on screen -------------------------------------------------------
+
+    def _day_at(self, y: int) -> int | None:
+        """The race day under the pointer (y from the top of the list), or None below the last."""
+        index = self.listbox.nearest(y)
+        box = self.listbox.bbox(index) if index >= 0 else None
+        return index if box and box[1] <= y < box[1] + box[3] else None
+
+    def _click(self, event: tk.Event) -> str | None:
+        """A click on the selected race day unselects it, leaving none selected; a click on
+        another selects it, as usual."""
+        index = self._day_at(event.y)
+        if index is None or not self.listbox.selection_includes(index):
+            return None                                  # the listbox selects it
+        self.listbox.selection_clear(0, tk.END)
+        self.listbox.focus_set()
+        self._selection_changed()
+        return "break"
+
+    def _double_click(self, event: tk.Event) -> str | None:
+        """Open the race day double-clicked (its first click may have unselected it)."""
+        index = self._day_at(event.y)
+        if index is None:
+            return None
+        self.listbox.selection_clear(0, tk.END)
+        self.listbox.selection_set(index)
+        self.listbox.activate(index)
+        self._selection_changed()
+        return self.edit_race_day()
 
     def _selected_index(self) -> int | None:
         selection = self.listbox.curselection()
@@ -154,14 +188,26 @@ class CompetitionWindow(tk.Toplevel):
                       else "Final results (set Races counted with Edit first)"),
             state="normal" if count else "disabled")
         self.results_menu.entryconfigure(4, state="normal" if count else "disabled")
-        for button in (self.edit_button, self.delete_button):
-            button.state(["!disabled" if index is not None else "disabled"])
+        self._show_day_buttons(selected=index is not None)
         if not session.competition.race_days:
-            self.status_var.set("No race days yet. Click New to add one.")
+            self.status_var.set("No race days yet. Click New to add one, or Import CSV to add one "
+                                "exported from a race day window.")
         elif index is None:
-            self.status_var.set("Select a race day, then click Edit (or double-click it).")
+            self.status_var.set("Select a race day to edit it, or click Import CSV to add one "
+                                "exported from a race day window.")
         else:
             self.status_var.set("Click Edit (or double-click) to enter or change the results.")
+
+    def _show_day_buttons(self, selected: bool) -> None:
+        """Edit and Delete for the selected race day; Import CSV, in their place, with none."""
+        self.import_button.state(["disabled" if self.session.competition.is_full else "!disabled"])
+        shown, hidden = (([self.edit_button, self.delete_button], [self.import_button]) if selected
+                         else ([self.import_button], [self.edit_button, self.delete_button]))
+        for button in hidden:
+            button.pack_forget()
+        for button in shown:
+            if not button.winfo_manager():
+                button.pack(side="left", padx=2)
 
     def _show_preview(self) -> None:
         tree = self.preview
@@ -206,6 +252,49 @@ class CompetitionWindow(tk.Toplevel):
             return
         try:
             index = session.add_race_day(day)
+        except (ValueError, StorageError) as exc:
+            messagebox.showerror("Cannot save", str(exc), parent=self)
+            return
+        self._refresh(select=index)
+
+    def import_race_day(self) -> None:
+        """Add a race day from a CSV file made by a race day window's Export CSV, or replace one
+        with a later version of it (see services/race_day_import.py). It opens in the race day
+        window first, to check before saving."""
+        session = self.session
+        path = filedialog.askopenfilename(parent=self, title="Import a race day",
+                                          initialdir=str(downloads_dir()),   # as sent by email
+                                          filetypes=[("CSV files", "*.csv"), ("All files", "*")])
+        if not path:
+            return
+        try:
+            file = read_race_day_csv(path)
+            plan = plan_import(file, self.club.abbreviation, session.class_names,
+                               session.competition)
+        except (StorageError, ImportRefused) as exc:
+            messagebox.showwarning("Import CSV", str(exc), parent=self)
+            return
+        if plan.question and not messagebox.askyesno("Import CSV", plan.question, icon="warning",
+                                                     default="no", parent=self):
+            return
+        members = self._load_members()
+        if members is None:
+            return
+        action = "replacing" if plan.replace is not None else "new"
+        day = RaceDayWindow(self, plan.race_day,
+                            title=f"{session.competition.title} - imported race day, {action} "
+                                  f"(from {source_text(file)})",
+                            default_rows=self.settings.default_rows,
+                            resolver=self.session.resolver(members),
+                            **self._race_day_options()).show()
+        if day is None:
+            return
+        try:
+            if plan.replace is None:
+                index = session.add_race_day(day, based_on=plan.race_day)
+            else:
+                index = plan.replace
+                session.update_race_day(index, day, based_on=plan.race_day)
         except (ValueError, StorageError) as exc:
             messagebox.showerror("Cannot save", str(exc), parent=self)
             return
@@ -272,9 +361,11 @@ class CompetitionWindow(tk.Toplevel):
         return self.settings.club_output_dir(self.club.abbreviation) / self.session.competition.directory
 
     def _race_day_options(self) -> dict:
-        """Where the race day window's Export HTML writes, and the titles and logo for its page."""
+        """Where the race day window's Export HTML writes, the titles and logo for its page, and
+        the club for Export CSV's heading and the folder it offers (the output folder)."""
         return {"html_folder": self._html_folder(), "competition_title": self.session.competition.title,
-                "club_title": self.club.title, "logo": self.club.logo}
+                "club_title": self.club.title, "logo": self.club.logo,
+                "club": self.club.abbreviation, "csv_folder": self.settings.output_dir}
 
     def _load_members(self) -> MemberList | None:
         """Read the club's sail numbers afresh, so changes to the file are picked up."""

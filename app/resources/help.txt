@@ -34,6 +34,19 @@ A race day is a small table: up to 6 races (Race A, Race B ...) side by side, an
 - Enter, Tab or Down moves down the column, adding a row at the bottom until there are 15, then moves to the top of the next column. Shift+Tab or Up goes back.
 - Add row and Add column grow the table.
 - Save writes the competition file straight away.
+- Export CSV saves the race day as a file, to bring it into another copy of the competition (on another computer, say) or to open in a spreadsheet. It starts with a heading: the club, competition, classes, race day, date and version, and when it was exported. It exports the race day as saved: save any changes first.
+
+Each race day has a version number, which goes up by one each time a change to it is saved, and the time of that save. They tell copies of a race day apart.
+
+Click the selected race day again to leave none selected. Edit and Delete then give way to Import CSV, which brings in a race day from a file made by Export CSV:
+
+- A race day from another club, or raced in classes this competition does not have, is refused.
+- A race day this competition does not have (by its name) is added.
+- A later version of a race day it has replaces it, in the same place in the list.
+- The same version, unchanged, is already up to date: nothing happens.
+- An earlier version, or the same version changed in both copies, replaces it only if you say so: you are shown both versions and when they were saved.
+
+Either way it opens in the race day window first, so you can check it before you Save.
 
 # Entering sail numbers
 

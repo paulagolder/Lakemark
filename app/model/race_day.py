@@ -7,6 +7,11 @@ A race day with a date but no name is named from the date: "Race Day 30-12-1978"
 
 On screen and in the file a race day is a table: one column per race, one row per finishing
 place. columns, rows and from_table() give that view of the races.
+
+version counts the saves that changed the race day (0: not yet saved, or saved before versions
+were kept), and saved is when the last of them was. They tell copies of a race day apart, so
+Import CSV knows which is later (see services/race_day_import.py). They are not part of what
+the race day holds: two race days are equal (==) when their name, date and races are.
 """
 
 from __future__ import annotations
@@ -59,6 +64,8 @@ class RaceDay:
     name: str
     races: list[Race] = field(default_factory=default_races)
     date: datetime.date | None = None        # None: not known
+    version: int = field(default=0, compare=False)
+    saved: datetime.datetime | None = field(default=None, compare=False)
 
     def __post_init__(self):
         if self.date is not None and not isinstance(self.date, datetime.date):
@@ -67,6 +74,25 @@ class RaceDay:
         if not self.name:
             raise ValueError("A race day needs a name or a date.")
         self.set_races(self.races)
+
+    def stamped(self, earlier: RaceDay | None, now: datetime.datetime) -> RaceDay:
+        """This race day with its version and save time, ready to save in place of earlier (None:
+        a new race day): earlier's if nothing has changed, otherwise the next version, saved now.
+        A race day from before versions were kept (version 0) becomes version 1 when saved."""
+        if earlier is not None and earlier == self and earlier.version:
+            self.version, self.saved = earlier.version, earlier.saved
+        else:
+            self.version = (earlier.version if earlier is not None else 0) + 1
+            self.saved = now.replace(second=0, microsecond=0)
+        return self
+
+    @property
+    def version_text(self) -> str:
+        """'version 4, saved 20/11/2026 18:02', or saying there is none (version 0)."""
+        if not self.version:
+            return "no version (saved before versions were kept)"
+        saved = f", saved {self.saved:%d/%m/%Y %H:%M}" if self.saved else ""
+        return f"version {self.version}{saved}"
 
     @property
     def label(self) -> str:

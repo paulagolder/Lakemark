@@ -13,6 +13,39 @@ from app.model.race_day import (
 )
 
 
+NOW = datetime.datetime(2026, 11, 24, 9, 30, 45)
+
+
+class VersionTests(unittest.TestCase):
+    def day(self, version: int, rows=(("12", "7"),)) -> RaceDay:
+        day = RaceDay.from_table("Day", ["A", "B"], [list(r) for r in rows])
+        day.version, day.saved = version, datetime.datetime(2026, 11, 20, 18, 2)
+        return day
+
+    def test_versions_are_not_part_of_equality(self):
+        self.assertEqual(self.day(1), self.day(5))
+
+    def test_a_new_race_day_is_version_1(self):
+        day = RaceDay("Day").stamped(None, NOW)
+        self.assertEqual((day.version, day.saved), (1, datetime.datetime(2026, 11, 24, 9, 30)))
+
+    def test_a_change_is_the_next_version(self):
+        day = self.day(0, rows=[["7", "12"]]).stamped(self.day(3), NOW)
+        self.assertEqual((day.version, day.saved), (4, datetime.datetime(2026, 11, 24, 9, 30)))
+
+    def test_no_change_keeps_the_version(self):
+        earlier = self.day(3)
+        day = self.day(0).stamped(earlier, NOW)
+        self.assertEqual((day.version, day.saved), (3, earlier.saved))
+
+    def test_saved_before_versions_becomes_version_1(self):
+        self.assertEqual(self.day(0).stamped(self.day(0), NOW).version, 1)
+
+    def test_version_text(self):
+        self.assertEqual(self.day(4).version_text, "version 4, saved 20/11/2026 18:02")
+        self.assertIn("before versions", self.day(0).version_text)
+
+
 class RaceDayTests(unittest.TestCase):
     def test_needs_a_name(self):
         for bad in ("", "   ", None):
