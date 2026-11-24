@@ -2,6 +2,9 @@
 
 Race results for RC yachts: enter and edit race results for radio-controlled model sailing yachts.
 
+**Home page, with downloads and a guide for club members: <https://paulagolder.github.io/Lakemark/>**
+This README is for working on the program itself.
+
 - The program keeps results for one or more **clubs**, such as RMBC and CwMBC (Chasewater), one
   at a time. Each club has its own folder of sailors, boat classes, competitions, title and logo,
   so one race manager can look after several clubs, and another club can start using it.
