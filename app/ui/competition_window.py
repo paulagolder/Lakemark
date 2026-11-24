@@ -56,7 +56,7 @@ class CompetitionWindow(tk.Toplevel):
         self.minsize(720, 440)
 
         self._build_widgets()
-        self._refresh(select=0)       # select the first race day, ready to edit
+        self._refresh()               # none selected: Import CSV shows, and the preview says how
         self.listbox.focus_set()
 
         self.bind("<Control-w>", lambda e: self.close())
@@ -123,10 +123,12 @@ class CompetitionWindow(tk.Toplevel):
         self.preview_frame = ttk.LabelFrame(body, text="Selected race day", padding=8)
         self.preview_frame.pack(side="left", fill="both", expand=True, padx=(12, 0))
         self.preview = ttk.Treeview(self.preview_frame, show="headings", selectmode="none")
-        scrollbar = ttk.Scrollbar(self.preview_frame, orient="vertical", command=self.preview.yview)
-        self.preview.configure(yscrollcommand=scrollbar.set)
-        scrollbar.pack(side="right", fill="y")
-        self.preview.pack(side="left", fill="both", expand=True)
+        self.preview_scrollbar = ttk.Scrollbar(self.preview_frame, orient="vertical",
+                                               command=self.preview.yview)
+        self.preview.configure(yscrollcommand=self.preview_scrollbar.set)
+        # in place of the table while no race day is selected
+        self.preview_hint = ttk.Label(self.preview_frame, anchor="center", justify="center",
+                                      foreground="gray40", font=("TkDefaultFont", 11))
 
     # -- refreshing what is on screen -------------------------------------------------------
 
@@ -222,7 +224,18 @@ class CompetitionWindow(tk.Toplevel):
         if index is None:
             tree.configure(columns=())
             self.preview_frame.configure(text="Selected race day")
+            self.preview_hint.configure(text=(
+                "Click a race day to view it,\nor Import CSV to add one."
+                if self.session.competition.race_days else
+                "No race days yet.\nClick New to add one, or Import CSV."))
+            self.preview_scrollbar.pack_forget()
+            tree.pack_forget()
+            self.preview_hint.pack(fill="both", expand=True)
             return
+        if not tree.winfo_manager():
+            self.preview_hint.pack_forget()
+            self.preview_scrollbar.pack(side="right", fill="y")
+            tree.pack(side="left", fill="both", expand=True)
         day = self.session.competition.race_days[index]
         ids = ["row"] + [f"c{i}" for i in range(len(day.columns))]   # ids, because names can repeat
         tree.configure(columns=ids)

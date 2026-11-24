@@ -120,7 +120,7 @@ on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
     python main.py                   # opens the default club, in ~/Documents/LakeMark/system
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # LakeMark 1.13 (24 November 2026)
+    python main.py --version         # LakeMark 1.14 (24 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers
