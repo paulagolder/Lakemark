@@ -4,7 +4,8 @@
 #     ./make_stick.sh /run/media/$USER/STICK                data from ~/Documents/LakeMark/system
 #     ./make_stick.sh /run/media/$USER/STICK ~/other-data   data from another folder
 #
-# Makes STICK/LakeMark/ (see portable/README.txt), renaming the Lakemark folder of an older stick:
+# Puts the quick-start guide, "LakeMark quick-start.pdf" (portable/), at the top of the stick and
+# makes STICK/LakeMark/ (see portable/README.txt), renaming the Lakemark folder of an older stick:
 #
 #     lakemark             the program for Linux
 #     lakemark.exe         the program for Windows
@@ -62,6 +63,9 @@ echo "Putting the program on $target ..."
 mkdir -p "$target/output" "$target/system"
 cp "$portable/lakemark" "$portable/install-windows.bat" "$target/"
 cp "$portable/system/README.txt" "$portable/system/start-linux.sh" "$target/system/"
+cp "portable/LakeMark quick-start.pdf" "$stick/"
+# Sticks made before version 1.15 have the guide under its old name.
+rm -f "$stick/LakeMark quick-start for Brian.pdf"
 
 # The Windows program, from this version's GitHub release.
 version="$(sed -n 's/^__version__ = "\(.*\)".*/\1/p' app/__init__.py)"

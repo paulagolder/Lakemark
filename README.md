@@ -212,7 +212,8 @@ To make a stick, plug it in and run
 
     ./make_stick.sh /run/media/$USER/STICK     # data from ~/Documents/LakeMark/system (or name another)
 
-It also puts the Windows program on the stick as `lakemark.exe`, so one stick works on Linux and
+It puts the quick-start guide for race managers, `portable/LakeMark quick-start.pdf`, at the top of
+the stick. It also puts the Windows program on the stick as `lakemark.exe`, so one stick works on Linux and
 Windows with the same data. That cannot be built on Linux, so it is downloaded from this version's
 GitHub release (and kept in `dist/`): release the version (tag and push it) before making sticks,
 or the stick gets the Linux program only.
