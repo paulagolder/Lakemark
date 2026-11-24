@@ -42,6 +42,11 @@ def _without_trailing_blank_rows(rows: list[list[str]]) -> list[list[str]]:
     return rows
 
 
+# The folder Export CSV last saved a file in, for every race day window until the program closes;
+# None: none yet, so it starts in the output folder (csv_folder).
+_export_folder: Path | None = None
+
+
 class RaceDayWindow(tk.Toplevel):
     def __init__(self, parent: tk.Tk | tk.Toplevel, race_day: RaceDay, title: str = "Edit race day",
                  default_rows: int = DEFAULT_ROWS, resolver: SailResolver | None = None,
@@ -63,7 +68,7 @@ class RaceDayWindow(tk.Toplevel):
         self.club_title = club_title
         self.logo = logo                            # the club's logo, for Export HTML
         self.club = club                            # its abbreviation, for Export CSV's heading
-        self.csv_folder = csv_folder                # where Export CSV offers to save (None: anywhere)
+        self.csv_folder = csv_folder                # where Export CSV first offers to save
         ttk.Style(self).configure(BAD_STYLE, fieldbackground="#f6c6c6", foreground="#9c0000")
 
         self.columns: list[str] = list(race_day.columns)    # race names
@@ -348,18 +353,21 @@ class RaceDayWindow(tk.Toplevel):
                 "Export CSV", "Save the race day first: Export CSV exports the race day as saved, "
                 "with its version number. Click Save, then open it again with Edit.", parent=self)
             return
-        folder = self.csv_folder
-        if folder is not None:
+        global _export_folder
+        folder = _export_folder if _export_folder is not None and _export_folder.is_dir() else None
+        if folder is None and self.csv_folder is not None:
             try:
-                folder.mkdir(parents=True, exist_ok=True)
+                self.csv_folder.mkdir(parents=True, exist_ok=True)
+                folder = self.csv_folder
             except OSError:
-                folder = None                            # the dialog starts where it likes
+                pass                                     # the dialog starts where it likes
         path = filedialog.asksaveasfilename(
             parent=self, defaultextension=".csv", filetypes=[("CSV files", "*.csv")],
             initialdir=str(folder) if folder is not None else None,
             initialfile=f"{day.name}.csv")
         if not path:
             return
+        _export_folder = Path(path).parent
         try:
             write_race_day_csv(path, RaceDayFile(
                 day, club=self.club, club_title=self.club_title,

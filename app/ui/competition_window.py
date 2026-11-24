@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import datetime
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable
 
@@ -35,6 +36,11 @@ from .browser import open_in_browser
 from .race_day_window import RaceDayWindow
 from .report_window import ReportWindow
 from .results_window import ResultsWindow
+
+
+# The folder Import CSV last picked a file from, for every competition window until the program
+# closes; None: none yet, so it starts in Downloads.
+_import_folder: Path | None = None
 
 
 class CompetitionWindow(tk.Toplevel):
@@ -261,12 +267,15 @@ class CompetitionWindow(tk.Toplevel):
         """Add a race day from a CSV file made by a race day window's Export CSV, or replace one
         with a later version of it (see services/race_day_import.py). It opens in the race day
         window first, to check before saving."""
+        global _import_folder
         session = self.session
+        start = _import_folder if _import_folder is not None and _import_folder.is_dir() else None
         path = filedialog.askopenfilename(parent=self, title="Import a race day",
-                                          initialdir=str(downloads_dir()),   # as sent by email
+                                          initialdir=str(start or downloads_dir()),  # from email
                                           filetypes=[("CSV files", "*.csv"), ("All files", "*")])
         if not path:
             return
+        _import_folder = Path(path).parent          # next time, even if this file is refused
         try:
             file = read_race_day_csv(path)
             plan = plan_import(file, self.club.abbreviation, session.class_names,
