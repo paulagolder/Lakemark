@@ -4,7 +4,8 @@
 #     ./make_stick_zip.sh FOLDER VERSION      FOLDER holds lakemark-VERSION-linux and
 #                                             lakemark-VERSION-windows.exe
 #
-# Writes FOLDER/lakemark-VERSION-stick.zip. Unzipped onto a USB stick (formatted exFAT), it is:
+# Writes FOLDER/lakemark-VERSION-stick.zip, about 40 MB. Unzipped onto a USB stick (at least
+# 100 MB, so the zip can be downloaded onto it too, and formatted exFAT), it is:
 #
 #     LakeMark quick-start.pdf
 #     LakeMark/

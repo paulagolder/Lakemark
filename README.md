@@ -225,8 +225,8 @@ GitHub release (and kept in `dist/`): release the version (tag and push it) befo
 or the stick gets the Linux program only.
 
 **A stick without your data**, from GitHub: each release also has `lakemark-<version>-stick.zip`
-(made by `make_stick_zip.sh` in the release workflow). Format a stick exFAT and unzip it onto the
-top of the stick: both programs, `install-windows.bat`, the quick-start guide, and an empty
+(made by `make_stick_zip.sh` in the release workflow). Format a stick of at least 100 MB exFAT and unzip it
+onto the top of the stick (the zip and its files together need about 80 MB): both programs, `install-windows.bat`, the quick-start guide, and an empty
 `system/`, so the first start makes the sample club, LMBC. No Linux computer or club data needed.
 
 It builds the program if needed and copies the club folders and `properties.xml` into

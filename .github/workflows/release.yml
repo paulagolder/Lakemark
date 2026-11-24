@@ -114,5 +114,5 @@ jobs:
             --notes-file - <<'EOF'
           Download the file for your computer: **-linux** for Linux, **-windows.exe** for Windows. Your competitions and club sailors stay in Documents/LakeMark and are not touched by a new version.
 
-          **-stick.zip** makes a LakeMark USB stick that works on both: format the stick exFAT, then unzip the file onto it, straight into the top of the stick (on Windows, Extract All and choose the stick's drive, such as E:\). It holds no club data: the first start makes a sample club, LMBC, to try the program on. On Windows, install-windows.bat on the stick installs LakeMark in Documents\LakeMark.
+          **-stick.zip** makes a LakeMark USB stick that works on both: use a stick of at least 100 MB, format it exFAT, then unzip the file onto it, straight into the top of the stick (on Windows, Extract All and choose the stick's drive, such as E:\). It holds no club data: the first start makes a sample club, LMBC, to try the program on. On Windows, install-windows.bat on the stick installs LakeMark in Documents\LakeMark.
           EOF
