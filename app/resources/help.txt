@@ -27,7 +27,7 @@ A competition holds up to 15 race days.
 
 # Race days
 
-In a competition's window, pick a race day and click Edit (or double-click it). A race day has a date (day/month/year) and a name, which follows the date ("Race Day 30-12-1978") until you change it.
+In a competition's window, pick a race day and click Edit (or double-click it). A race day has a date (day/month/year) and a name, which follows the date ("Race Day 30-12-1978") until you change it. A new race day is dated today, and a message asks you to check the date first: if it was raced on an earlier day, type that day's date before entering the results.
 
 A race day is a small table: up to 6 races (Race A, Race B ...) side by side, and up to 15 places down. Type each boat's sail number in finishing order: the first row came 1st.
 
@@ -38,7 +38,7 @@ A race day is a small table: up to 6 races (Race A, Race B ...) side by side, an
 
 Each race day has a version number, which goes up by one each time a change to it is saved, and the time of that save. They tell copies of a race day apart.
 
-The window opens with no race day selected: click one to see its table beside the list. Click the selected race day again to leave none selected. With none selected, Edit and Delete give way to Import CSV, which brings in a race day from a file made by Export CSV:
+The window opens with no race day selected: click one to see its table beside the list. Click the selected race day again to leave none selected. New opens a new race day when none is selected; with one selected, it first leaves none selected, so click New again. With none selected, Edit and Delete give way to Import CSV, which brings in a race day from a file made by Export CSV:
 
 - A race day from another club, or raced in classes this competition does not have, is refused.
 - A race day this competition does not have (by its name) is added.

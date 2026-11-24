@@ -201,8 +201,8 @@ class CompetitionWindow(tk.Toplevel):
             self.status_var.set("No race days yet. Click New to add one, or Import CSV to add one "
                                 "exported from a race day window.")
         elif index is None:
-            self.status_var.set("Select a race day to edit it, or click Import CSV to add one "
-                                "exported from a race day window.")
+            self.status_var.set("Select a race day to edit it, click New to create one, or click "
+                                "Import CSV to add one exported from a race day window.")
         else:
             self.status_var.set("Click Edit (or double-click) to enter or change the results.")
 
@@ -225,9 +225,10 @@ class CompetitionWindow(tk.Toplevel):
             tree.configure(columns=())
             self.preview_frame.configure(text="Selected race day")
             self.preview_hint.configure(text=(
-                "Click a race day to view it,\nor Import CSV to add one."
+                "Click a race day to view it,\nclick New to create a new race day,\n"
+                "or Import CSV to add one."
                 if self.session.competition.race_days else
-                "No race days yet.\nClick New to add one, or Import CSV."))
+                "No race days yet.\nClick New to create a new race day,\nor Import CSV to add one."))
             self.preview_scrollbar.pack_forget()
             tree.pack_forget()
             self.preview_hint.pack(fill="both", expand=True)
@@ -251,6 +252,12 @@ class CompetitionWindow(tk.Toplevel):
     # -- race days --------------------------------------------------------------------------
 
     def new_race_day(self) -> None:
+        """With a race day selected, New unselects it, showing the hint in its place; with none
+        selected, it opens a new race day."""
+        if self._selected_index() is not None:
+            self.listbox.selection_clear(0, tk.END)
+            self._selection_changed()
+            return
         session = self.session
         competition = session.competition
         if competition.is_full:
@@ -266,7 +273,7 @@ class CompetitionWindow(tk.Toplevel):
         day = RaceDayWindow(self, draft, title=f"{competition.title} - new race day",
                             default_rows=self.settings.default_rows,
                             resolver=self.session.resolver(members),
-                            **self._race_day_options()).show()
+                            **self._race_day_options()).show(check_date=True)
         if day is None:
             return
         try:

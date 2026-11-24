@@ -234,6 +234,18 @@ class RaceDayWindow(tk.Toplevel):
         if date is not None:
             self.name_var.set(dated_name(date))
 
+    def _check_date(self) -> None:
+        """Point out that a new race day is dated today, which is wrong when its results are
+        entered later, and put the cursor in the date, selected, ready to type over."""
+        messagebox.showinfo(
+            "Check the date",
+            f"The new race day is dated today, {self.date_var.get()}.\n\n"
+            f"If it was raced on an earlier day, change the date (dd/mm/yyyy) before entering the "
+            f"results. The name follows the date.", parent=self)
+        self.date_entry.focus_set()
+        self.date_entry.select_range(0, tk.END)
+        self.date_entry.icursor(tk.END)
+
     def _race_day(self, title: str) -> RaceDay | None:
         """The race day as entered, or None (after saying why) if its name or date is wrong."""
         try:
@@ -398,12 +410,15 @@ class RaceDayWindow(tk.Toplevel):
 
     # -- showing it -------------------------------------------------------------------------
 
-    def show(self) -> RaceDay | None:
-        """Show the window and wait until it is closed. Returns the saved race day, or None."""
+    def show(self, check_date: bool = False) -> RaceDay | None:
+        """Show the window and wait until it is closed. Returns the saved race day, or None.
+        check_date: a new race day, dated today; first ask the user to check the date."""
         self.geometry(f"+{self._parent.winfo_rootx() + 40}+{self._parent.winfo_rooty() + 40}")
         self.wait_visibility()           # grab_set fails if the window is not on screen yet
         self.grab_set()
         self._mark_problems()
         self._focus_cell(0, 0)
+        if check_date:
+            self._check_date()
         self.wait_window(self)
         return self.result
