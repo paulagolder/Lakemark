@@ -9,7 +9,8 @@ When --club names a club that is not there yet, the program offers to make it, s
 launcher sets the club up the first time it is used.
 
 A data folder from before version 1.05 is first turned into an RMBC club folder (see
-storage/club_store.py), which becomes the default club.
+storage/club_store.py), which becomes the default club. A new installation starts with the
+sample club, LMBC, as its default club.
 """
 
 from __future__ import annotations
@@ -19,7 +20,8 @@ from pathlib import Path
 from tkinter import messagebox
 
 from ..model.club import Club
-from ..storage.club_store import convert_old_folder, find_club, has_old_files, list_clubs
+from ..storage.club_store import (add_sample_club, convert_old_folder, find_club,
+                                  has_old_files, is_new_data_dir, list_clubs)
 from ..storage.errors import StorageError
 from ..storage.settings_store import (DEFAULT_TITLE, RMBC_LOGO_FILE, Settings, load_settings,
                                       old_title, save_settings)
@@ -35,12 +37,23 @@ def run(data_dir, club: str | None = None) -> None:
     set_app_icon(root)
     root.title(DEFAULT_TITLE)
     try:
+        new = is_new_data_dir(data_dir)
         settings = load_settings(data_dir)
+        if new:
+            add_sample(settings)
         convert(root, settings)
         chosen = choose_club(root, settings, club)
     finally:
         root.destroy()
     FrontWindow(settings, chosen).mainloop()
+
+
+def add_sample(settings: Settings) -> None:
+    """Start a new installation with the sample club, and make it the default club."""
+    club = add_sample_club(settings.data_dir)
+    if club is not None:
+        settings.default_club = club.abbreviation
+        save_settings(settings)
 
 
 def convert(root: tk.Misc, settings: Settings) -> None:

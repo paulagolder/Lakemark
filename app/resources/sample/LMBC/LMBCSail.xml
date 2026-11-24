@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sails>
+  <sail sailnumber="7" boatclass="DF95" forename="Francis" surname="Drake" tag="FD" />
+  <sail sailnumber="11" boatclass="DF95" forename="Anne" surname="Bonny" tag="AB" />
+  <sail sailnumber="17" boatclass="DF95" forename="Edward" surname="Teach" tag="ET" />
+  <sail sailnumber="23" boatclass="DF95" forename="Grace" surname="O'Malley" tag="GO" />
+  <sail sailnumber="31" boatclass="DF95" forename="Ferdinand" surname="Magellan" tag="FM" />
+  <sail sailnumber="42" boatclass="DF95" forename="James" surname="Cook" tag="JC" />
+</sails>

@@ -83,6 +83,12 @@ club's **details** (title and logo), edits its **Club sailors** and **Boat class
 it (**Export club...**). A club's abbreviation names its folder and files, so it cannot be
 changed; it is 1 to 10 letters or digits.
 
+A new installation (no data folder yet, or an empty one, as on a new stick) starts with a
+**sample club**, LMBC (LakeMark Model Boat Club), so the program can be tried without entering
+anything: six DF95 sailors, pirates and navigators from history, and a competition, DF95 2026,
+with two race days. It is in `app/resources/sample/LMBC`. A data folder that already has
+settings or clubs never gets it, and it can be left alone or deleted like any club.
+
 ### Handing a club over
 
 To pass a club on to another race manager, choose **Club > Export club...**. It saves the
@@ -120,7 +126,7 @@ on Debian/Ubuntu install `python3-tk`). Nothing else to install.
 
     python main.py                   # opens the default club, in ~/Documents/LakeMark/system
     python main.py --club CwMBC      # opens another club
-    python main.py --version         # LakeMark 1.15 (24 November 2026)
+    python main.py --version         # LakeMark 1.16 (24 November 2026)
     python main.py --data FOLDER     # uses another data folder
 
 ## Entering sail numbers

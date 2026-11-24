@@ -10,7 +10,7 @@ On Windows you can also install it from a LakeMark USB stick: double-click insta
 
 Windows may warn "Windows protected your PC", because the program is not code-signed: click More info, then Run anyway.
 
-The window is headed LakeMark until you choose a club. Choose one with File > Choose club..., or make your first with File > New club...: an abbreviation (such as RMBC, 1 to 10 letters or digits) and a title. The club becomes the heading, with its logo, and the Club menu comes alive. Next time, the program opens with the club you chose last.
+The window is headed LakeMark until you choose a club. Choose one with File > Choose club..., or make your first with File > New club...: an abbreviation (such as RMBC, 1 to 10 letters or digits) and a title. The club becomes the heading, with its logo, and the Club menu comes alive. Next time, the program opens with the club you chose last. A new installation opens with a sample club, LMBC (LakeMark Model Boat Club), to try the program on: six DF95 sailors from history and a competition with two race days. Practise on it freely; it holds no real sailors.
 
 A new version never touches your data: your clubs, sailors and competitions stay in the LakeMark folder in your Documents folder (see Where things are kept).
 

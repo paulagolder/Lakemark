@@ -11,6 +11,11 @@ A sub folder without its Club.xml is not a club, and is left alone.
 Before version 1.05 the data folder held one club's files (RMBC's) directly:
 RMBCSail.xml, yachtclasses.xml and the competitions. convert_old_folder moves them into an
 RMBC club folder the first time 1.05 runs.
+
+A new installation, a data folder with no settings and no clubs yet, starts with a sample club
+(add_sample_club): LMBC, the LakeMark Model Boat Club, with six DF95 sailors (pirates and
+navigators from history) and a DF95 competition of two race days. It lets someone try the program
+without entering anything, and holds no real sailors' names. An existing data folder never gets it.
 """
 
 from __future__ import annotations
@@ -33,6 +38,7 @@ OLD_CLUB = "RMBC"                        # whose files were in the data folder b
 OLD_SAILORS_FILE = "RMBCSail.xml"
 OLD_CLASSES_FILE = "yachtclasses.xml"
 OLD_COMPETITIONS = "*.cxml*"             # competitions, with their .bak and .deleted copies
+SAMPLE_CLUB_FOLDER = Path(__file__).parent.parent / "resources" / "sample" / "LMBC"
 
 
 def load_club(folder) -> Club | None:
@@ -130,6 +136,26 @@ def has_old_files(data_dir) -> bool:
     data_dir = Path(data_dir)
     return ((data_dir / OLD_SAILORS_FILE).exists() or (data_dir / OLD_CLASSES_FILE).exists()
             or any(data_dir.glob(OLD_COMPETITIONS)))
+
+
+def is_new_data_dir(data_dir) -> bool:
+    """Whether the data folder is a new installation's: no settings, no clubs and no files from
+    before 1.05 (it may not exist yet, or hold only a portable copy's README)."""
+    data_dir = Path(data_dir)
+    return (not (data_dir / "properties.xml").exists() and not list_clubs(data_dir)
+            and not has_old_files(data_dir))
+
+
+def add_sample_club(data_dir, sample: Path = SAMPLE_CLUB_FOLDER) -> Club | None:
+    """Copy the sample club into the data folder. Returns it, or None if it could not be copied
+    (the program then starts with no club, as before)."""
+    target = Path(data_dir) / sample.name
+    try:
+        Path(data_dir).mkdir(parents=True, exist_ok=True)
+        shutil.copytree(sample, target)
+    except OSError:
+        return None
+    return load_club(target)
 
 
 def convert_old_folder(data_dir, title: str = "", logo: Path | None = None) -> Club | None:
