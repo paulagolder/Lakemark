@@ -6,7 +6,8 @@
 #     git push origin v1.02
 #
 # The tests run on both systems first; if they fail, nothing is published. The release (named
-# after the tag) gets two files: lakemark-<version>-linux and lakemark-<version>-windows.exe.
+# after the tag) gets three files: lakemark-<version>-linux, lakemark-<version>-windows.exe, and
+# lakemark-<version>-stick.zip, both programs ready to unzip onto a USB stick (make_stick_zip.sh).
 #
 # It can also be started by hand (Actions > Build and release > Run workflow) to check that the
 # builds work: then the files are kept with the run (under Artifacts) and nothing is published.
@@ -66,10 +67,34 @@ jobs:
           path: dist/lakemark-*
           if-no-files-found: error
 
+  stick:
+    # The stick zip, from the two programs: no club data, so it starts with the sample club.
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: files
+          merge-multiple: true
+
+      - name: Make the stick zip
+        run: |
+          version="$(ls files/lakemark-*-linux | sed 's|.*/lakemark-\(.*\)-linux|\1|')"
+          ./make_stick_zip.sh files "$version"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          retention-days: 2
+          name: lakemark-stick
+          path: files/lakemark-*-stick.zip
+          if-no-files-found: error
+
   release:
     # Only for a version tag, not when started by hand.
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [build, stick]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -86,4 +111,8 @@ jobs:
           gh release create "$GITHUB_REF_NAME" files/* \
             --repo "$GITHUB_REPOSITORY" \
             --title "LakeMark ${GITHUB_REF_NAME#v}" \
-            --notes "Download the file for your computer: **-linux** for Linux, **-windows.exe** for Windows. Your competitions and club sailors stay in the .lakemark folder in your home folder and are not touched by a new version."
+            --notes-file - <<'EOF'
+          Download the file for your computer: **-linux** for Linux, **-windows.exe** for Windows. Your competitions and club sailors stay in Documents/LakeMark and are not touched by a new version.
+
+          **-stick.zip** makes a LakeMark USB stick that works on both: format the stick exFAT, then unzip the file onto it, straight into the top of the stick (on Windows, Extract All and choose the stick's drive, such as E:\). It holds no club data: the first start makes a sample club, LMBC, to try the program on. On Windows, install-windows.bat on the stick installs LakeMark in Documents\LakeMark.
+          EOF
